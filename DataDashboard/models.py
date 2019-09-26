@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import datetime
 
 
 class House(models.Model):
@@ -21,19 +22,19 @@ class Teacher(models.Model):
 class TutorGroup(models.Model):
     group_name = models.CharField(blank=False, null=False, max_length=100)
     tutor = models.ForeignKey('Teacher', blank=True, null=True, on_delete=models.SET_NULL)
-    year_group = models.IntegerField(blank=False, null=False)
+    year_group = models.IntegerField(blank=False, null=True)
 
 
 class Student(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
-    student_id = models.IntegerField(blank=True, null=True)
+    student_id = models.IntegerField(blank=True, null=True, unique=True)
     first_name = models.CharField(blank=False, null=False, max_length=100)
     last_name = models.CharField(blank=False, null=False, max_length=100)
     preferred_forename = models.CharField(blank=True, null=True, max_length=100)
     gender = models.CharField(blank=True, null=True, max_length=20)
     tutor_group = models.ForeignKey(TutorGroup, blank=True, null=True, on_delete=models.SET_NULL)
-    sen_status = models.CharField(blank=True, null=True, max_length=20)
-    eal_status = models.CharField(blank=True, null=True, max_length=20)
+    sen_status = models.CharField(blank=True, null=True, max_length=100)
+    eal_status = models.CharField(blank=True, null=True, max_length=100)
     exam_candidate_number = models.CharField(blank=True, null=True, max_length=20)
     house = models.ForeignKey(House, blank=True, null=True, on_delete=models.SET_NULL)
     parent_email = models.EmailField(blank=True, null=True)
@@ -96,17 +97,17 @@ class SummativeScheme(models.Model):
 
 
 class SummativeDefinition(models.Model):
-    scheme = models.ForeignKey(SummativeScheme, blank=False, null=False, on_delete=models.CASCADE)
+scheme = models.ForeignKey(SummativeScheme, blank=True, null=True, on_delete=models.CASCADE)
     name = models.CharField(blank=False, null=False, max_length=100)
-    max_score = models.IntegerField(blank=False, null=False)
-    min_score = models.IntegerField(blank=False, null=False)
-    increment = models.FloatField(blank=False, null=False)
+    max_score = models.IntegerField(blank=False, null=True)
+    min_score = models.IntegerField(blank=False, null=True)
+    increment = models.FloatField(blank=False, null=True)
 
 
 class SummativeData(models.Model):
     data = models.ForeignKey(SummativeDefinition, blank=False, null=False, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, blank=False, null=False, on_delete=models.CASCADE)
-    date = models.DateField(blank=False, null=False)
+    date = models.DateField(blank=False, null=False, default=datetime.date.today)
     value = models.FloatField(blank=False, null=False)
 
 
@@ -144,3 +145,9 @@ class MarksheetData(models.Model):
     date = models.DateField(blank=False, null=False)
     numerical_value = models.FloatField(blank=True, null=True)
     text_value = models.TextField(blank=True, null=True)
+
+
+class CSVDoc(models.Model):
+    description = models.CharField(max_length=255, blank=True)
+    document = models.FileField(upload_to='documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)

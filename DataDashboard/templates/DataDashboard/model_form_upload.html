@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Student Data</title>
+
+</head>
+<body>
+{% csrf_token %}
+<h1>Import Students</h1>
+    <form action={% url 'DataDashboard:import_students' %} method="POST" enctype="multipart/form-data">{% csrf_token %}
+        {{ csvform.as_p }}
+        <input type="submit" value="Upload" />
+    </form>
+</body>
+</html>
