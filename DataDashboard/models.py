@@ -97,7 +97,7 @@ class SummativeScheme(models.Model):
 
 
 class SummativeDefinition(models.Model):
-scheme = models.ForeignKey(SummativeScheme, blank=True, null=True, on_delete=models.CASCADE)
+    scheme = models.ForeignKey(SummativeScheme, blank=True, null=True, on_delete=models.CASCADE)
     name = models.CharField(blank=False, null=False, max_length=100)
     max_score = models.IntegerField(blank=False, null=True)
     min_score = models.IntegerField(blank=False, null=True)
@@ -108,7 +108,8 @@ class SummativeData(models.Model):
     data = models.ForeignKey(SummativeDefinition, blank=False, null=False, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, blank=False, null=False, on_delete=models.CASCADE)
     date = models.DateField(blank=False, null=False, default=datetime.date.today)
-    value = models.FloatField(blank=False, null=False)
+    value = models.FloatField(blank=False, null=True)
+    letter_value = models.CharField(max_length=20, blank=True, null=True)
 
 
 class Faculty(models.Model):

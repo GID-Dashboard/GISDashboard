@@ -1,7 +1,7 @@
 import csv, re
 from openpyxl import load_workbook
 from django.contrib.auth.models import User, Group
-from .models import Student, TutorGroup, House, SummativeDefinition, SummativeData, AptitudinalData
+from .models import Student, TutorGroup, House, SummativeDefinition, SummativeData, AptitudinalData, TeachingGroup
 
 
 def processstudent(path):
@@ -174,41 +174,66 @@ def addrecord(record):
 
         if created:
             print('Created and deleted student with Admission no: ' + student.student_id)
-            student.delete()
 
         for data_point in record:
 
             # Add any numbers immediately:
             if is_number(record[data_point]):
                 data_aspect, created = SummativeDefinition.objects.get_or_create(name=data_point)
-                SummativeData.objects.get_or_create(data=data_aspect,
-                                                    student=student,
-                                                    value=record[data_point])
+                data_record = SummativeData.objects.filter(data=data_aspect,
+                                                                    student=student,
+                                                                    ).order_by('-date')
+                if data_record:
+                    data_record = data_record[0]
+                    if record[data_point] != data_record.value:
+                        SummativeData.objects.create(data=data_aspect,
+                                                     student=student,
+                                                     value=record[data_point])
+                else:
+                    SummativeData.objects.create(data=data_aspect,
+                                                 student=student,
+                                                 value=record[data_point])
 
             else:  # Not a number, so we need to store + convert
-                pass
 
-                # if data_point == 'Class':
-                #     teaching_group, created = TeachingGroup.objects.get_or_create(name=record['Class'])
-                #     student.teachinggroup_set.add(teaching_group)
-                # if data_point == 'Reg Group':
-                #     pass
-                #
-                # if data_point == 'EAL':
-                #     pass
-                #
-                # if data_point == 'Reg Group':
-                #     pass
-                #
-                # if data_point == 'Surname Forename':
-                #     pass
-                #
-                # else:
-                #     data_aspect, created = SummativeDefinition.objects.get_or_create(name=data_point)
-                #     SummativeData.objects.get_or_create(data=data_aspect,
-                #                                         student=student,
-                #                                         value=record[data_point])
-                #
+                # Add any classgroups
+                if data_point == 'Class':
+                    teaching_group, created = TeachingGroup.objects.get_or_create(name=record['Class'])
+                    student.teachinggroup_set.add(teaching_group)
+
+                # The following should be done by the Students import, not marksheets.
+                if data_point == 'Reg Group':
+                    pass
+
+                if data_point == 'EAL':
+                    pass
+
+                if data_point == 'Reg Group':
+                    pass
+
+                if data_point == 'Surname Forename':
+                    pass
+
+                # To enable us to record letter grades.
+                else:
+                    data_aspect, created = SummativeDefinition.objects.get_or_create(name=data_point)
+                    student_db_data_records = SummativeData.objects.filter(data=data_aspect,
+                                                                student=student,
+                                                                ). \
+                        order_by('-date')
+
+                    if student_db_data_records:  # record exists
+                        student_record = student_db_data_records[0]
+                        if student_record.letter_value != record[data_point]:
+                            SummativeData.objects.create(student=student,
+                                                         data=data_aspect,
+                                                         letter_value=record[data_point])
+
+                    else:
+
+                        SummativeData.objects.create(student=student,
+                                                     data=data_aspect,
+                                                     letter_value=record[data_point])
 
 
 def add_CAT4_table():
@@ -225,10 +250,8 @@ def add_CAT4_table():
 
     for point in relevant_data:
         student_a_data, created = AptitudinalData.objects.get_or_create(student=point.student,
-                                              date=point.date)
+                                                                        date=point.date)
 
-        if point.name=='CAT4 Verbal SAS':
+        if point.name == 'CAT4 Verbal SAS':
             student_a_data.verbal = point.value
             student_a_data.save()
-
-
