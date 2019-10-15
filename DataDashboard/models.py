@@ -19,14 +19,30 @@ class Teacher(models.Model):
     position = models.CharField(blank=False, null=False, max_length=5)
 
 
+class YearGroup(models.Model):
+
+    year = models.CharField(max_length=10, blank=False, null=False)
+    integer_year = models.IntegerField(blank=False, null=True)
+    heads_of_year = models.ManyToManyField(Teacher, blank=True)
+
+    def set_integer_year(self):
+        try:
+            self.integer_year = int(self.year)
+
+        except ValueError:
+            self.integer_year = 0
+
+        self.save()
+
+
 class TutorGroup(models.Model):
     group_name = models.CharField(blank=False, null=False, max_length=100)
     tutor = models.ForeignKey('Teacher', blank=True, null=True, on_delete=models.SET_NULL)
-    year_group = models.IntegerField(blank=False, null=True)
+    year_group = models.ForeignKey(YearGroup, blank=False, null=True, on_delete=models.SET_NULL)
 
 
 class Student(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL)
     student_id = models.IntegerField(blank=True, null=True, unique=True)
     first_name = models.CharField(blank=False, null=False, max_length=100)
     last_name = models.CharField(blank=False, null=False, max_length=100)
@@ -110,6 +126,38 @@ class SummativeData(models.Model):
     date = models.DateField(blank=False, null=False, default=datetime.date.today)
     value = models.FloatField(blank=False, null=True)
     letter_value = models.CharField(max_length=20, blank=True, null=True)
+    raw_value = models.TextField(blank=True, null=True)
+
+    def value_from_raw(self):
+        if self.raw_value:
+            from .functions import is_number
+            if is_number(self.raw_value):
+                self.value = self.raw_value
+
+            elif len(self.raw_value) < 20:
+                self.letter_value = self.raw_value
+
+                # TODO: Add code here to convert letter grades to numerical
+                raw = self.raw_value
+                if raw == ('S' or 'A*' or 'SS' or 'A*A*'):
+                    self.value = 9
+                if raw == ('A' or 'AA' or 'aa' or 'a'):
+                    self.value = 8
+                if raw == ('B' or 'BB' or 'b' or 'bb'):
+                    self.value = 7
+                if raw == ('C' or 'CC' or 'c' or 'cc'):
+                    self.value = 6
+                if raw == ('D' or 'DD' or 'd' or 'dd'):
+                    self.value = 5
+                if raw == ('E' or 'EE' or 'e' or 'ee'):
+                    self.value = 4
+                if raw == ('F' or 'FF' or 'f' or 'ff'):
+                    self.value = 3
+                if raw == ('G' or 'GG' or 'g' or 'gg'):
+                    self.value = 2
+                if raw == ('U' or 'UU' or 'u' or 'uu'):
+                    self.value = 1
+            self.save()
 
 
 class Faculty(models.Model):

@@ -1,7 +1,8 @@
 import csv, re
 from openpyxl import load_workbook
 from django.contrib.auth.models import User, Group
-from .models import Student, TutorGroup, House, SummativeDefinition, SummativeData, AptitudinalData, TeachingGroup
+from .models import Student, TutorGroup, House, SummativeDefinition, SummativeData, AptitudinalData, TeachingGroup, \
+    YearGroup
 
 
 def processstudent(path):
@@ -51,24 +52,40 @@ def addstudent(newstudent):
     students_user_group.user_set.add(newuser)
 
     new_tutor_group, created = TutorGroup.objects.get_or_create(group_name=newstudent['tutor_group'])
-    new_house, created = House.objects.get_or_create(name=newstudent['house'])
-    student = Student.objects.create(user=newuser,
-                                     gender=newstudent['gender'],
-                                     student_id=newstudent['student_id'],
-                                     first_name=newstudent['first_name'],
-                                     last_name=newstudent['last_name'],
-                                     preferred_forename=newstudent['preferred_forename'],
-                                     tutor_group=new_tutor_group,
-                                     sen_status=newstudent['sen_status'],
-                                     eal_status=newstudent['eal_status'],
-                                     exam_candidate_number=newstudent['exam_candidate_number'],
-                                     house=new_house,
-                                     parent_email=newstudent['parent_email'],
-                                     parent_salutation=newstudent['parent_salutation'],
-                                     student_email=newstudent['student_email']
-                                     )
+    if created:
+        try:
+            year_name = re.search('\d{1,2}', new_tutor_group.group_name).group(0)
 
-    return student
+        except AttributeError:
+            year_name = new_tutor_group.group_name
+
+        except IndexError:
+            year_name = new_tutor_group.group_name
+
+        year_group, created = YearGroup.objects.get_or_create(year=year_name)
+        new_tutor_group.year_group = year_group
+        new_tutor_group.save()
+        if created:
+            year_group.set_integer_year()
+
+    new_house, created = House.objects.get_or_create(name=newstudent['house'])
+    db_student, created = Student.objects.get_or_create(user=newuser)
+    db_student.gender = newstudent['gender']
+    db_student.student_id = newstudent['student_id']
+    db_student.first_name = newstudent['first_name']
+    db_student.last_name = newstudent['last_name']
+    db_student.preferred_forename = newstudent['preferred_forename']
+    db_student.tutor_group = new_tutor_group
+    db_student.sen_status = newstudent['sen_status']
+    db_student.eal_status = newstudent['eal_status']
+    db_student.exam_candidate_number = newstudent['exam_candidate_number']
+    db_student.house = new_house
+    db_student.parent_email = newstudent['parent_email']
+    db_student.parent_salutation = newstudent['parent_salutation']
+    db_student.student_email = newstudent['student_email']
+    db_student.save()
+
+    return db_student
 
 
 def process_fac_marksheet(path):
@@ -177,63 +194,51 @@ def addrecord(record):
 
         for data_point in record:
 
-            # Add any numbers immediately:
-            if is_number(record[data_point]):
+            # Skip blank records
+            if not record[data_point]:
+                continue
+
+            # Add any classgroups
+            if data_point == 'Class':
+                teaching_group, created = TeachingGroup.objects.get_or_create(name=record['Class'])
+                student.teachinggroup_set.add(teaching_group)
+
+            # The following should be done by the Students import, not marksheets.
+            if data_point == 'Reg Group':
+                pass
+
+            if data_point == 'EAL':
+                pass
+
+            if data_point == 'Reg Group':
+                pass
+
+            if data_point == 'Surname Forename':
+                pass
+
+            # To enable us to record letter grades.
+            else:
                 data_aspect, created = SummativeDefinition.objects.get_or_create(name=data_point)
-                data_record = SummativeData.objects.filter(data=data_aspect,
-                                                                    student=student,
-                                                                    ).order_by('-date')
-                if data_record:
-                    data_record = data_record[0]
-                    if record[data_point] != data_record.value:
-                        SummativeData.objects.create(data=data_aspect,
-                                                     student=student,
-                                                     value=record[data_point])
-                else:
-                    SummativeData.objects.create(data=data_aspect,
-                                                 student=student,
-                                                 value=record[data_point])
+                student_db_data_records = SummativeData.objects.filter(data=data_aspect,
+                                                                       student=student,
+                                                                       ). \
+                    order_by('-date')
 
-            else:  # Not a number, so we need to store + convert
-
-                # Add any classgroups
-                if data_point == 'Class':
-                    teaching_group, created = TeachingGroup.objects.get_or_create(name=record['Class'])
-                    student.teachinggroup_set.add(teaching_group)
-
-                # The following should be done by the Students import, not marksheets.
-                if data_point == 'Reg Group':
-                    pass
-
-                if data_point == 'EAL':
-                    pass
-
-                if data_point == 'Reg Group':
-                    pass
-
-                if data_point == 'Surname Forename':
-                    pass
-
-                # To enable us to record letter grades.
-                else:
-                    data_aspect, created = SummativeDefinition.objects.get_or_create(name=data_point)
-                    student_db_data_records = SummativeData.objects.filter(data=data_aspect,
-                                                                student=student,
-                                                                ). \
-                        order_by('-date')
-
-                    if student_db_data_records:  # record exists
-                        student_record = student_db_data_records[0]
-                        if student_record.letter_value != record[data_point]:
-                            SummativeData.objects.create(student=student,
-                                                         data=data_aspect,
-                                                         letter_value=record[data_point])
-
-                    else:
-
-                        SummativeData.objects.create(student=student,
+                if student_db_data_records:  # record exists
+                    student_record = student_db_data_records[0]
+                    if student_record.letter_value != record[data_point]:
+                        data = SummativeData.objects.create(student=student,
                                                      data=data_aspect,
-                                                     letter_value=record[data_point])
+                                                     raw_value=record[data_point])
+                        data.value_from_raw()
+
+                else:
+
+                    data = SummativeData.objects.create(student=student,
+                                                 data=data_aspect,
+                                                 raw_value=record[data_point])
+                    data.value_from_raw()
+
 
 
 def add_CAT4_table():
