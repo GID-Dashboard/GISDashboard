@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-import datetime
+import datetime, re
 
 
 class House(models.Model):
@@ -21,7 +21,7 @@ class Teacher(models.Model):
 
 class YearGroup(models.Model):
 
-    year = models.CharField(max_length=10, blank=False, null=False)
+    year = models.CharField(max_length=10, blank=False, null=False, unique=True)
     integer_year = models.IntegerField(blank=False, null=True)
     heads_of_year = models.ManyToManyField(Teacher, blank=True)
 
@@ -68,7 +68,18 @@ class TeachingGroup(models.Model):
     name = models.CharField(blank=False, null=False, max_length=20)
     teachers = models.ManyToManyField(Teacher, blank=True)
     students = models.ManyToManyField(Student, blank=True)
+    yeargroup = models.ForeignKey(YearGroup, on_delete=models.SET_NULL, blank=True, null=True)
+    department = models.ForeignKey('Department', on_delete=models.SET_NULL, blank=True, null=True)
 
+    def set_year_and_departmnet(self):
+        year = re.search(r'^\d{1,2}', self.name).group(0)
+        yeargroup, created = YearGroup.objects.get_or_create(year=year)
+        self.yeargroup = yeargroup
+
+        dept_string = re.search(r'\/(..)', self.name).group(1)
+        dept, created = Department.objects.get_or_create(code=dept_string)
+        self.department = dept
+        self.save()
 
 class ClassAtttenanceSession(models.Model):
     attendance_session = models.ForeignKey(AttendanceSession, blank=False, null=False, on_delete=models.CASCADE)
@@ -171,6 +182,7 @@ class Department(models.Model):
     faculty = models.ForeignKey(Faculty, blank=True, null=True, on_delete=models.SET_NULL)
     hod = models.ManyToManyField(Teacher, blank=True, related_name='hod')
     staff = models.ManyToManyField(Teacher, blank=True)
+    code = models.CharField(max_length=2, blank=False, null=True, unique=True)
 
 
 class Marksheet(models.Model):

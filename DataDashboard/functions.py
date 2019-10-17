@@ -201,6 +201,9 @@ def addrecord(record):
             # Add any classgroups
             if data_point == 'Class':
                 teaching_group, created = TeachingGroup.objects.get_or_create(name=record['Class'])
+                if created:
+                    teaching_group.set_year_and_departmnet()
+
                 student.teachinggroup_set.add(teaching_group)
 
             # The following should be done by the Students import, not marksheets.
