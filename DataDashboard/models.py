@@ -175,7 +175,8 @@ class Faculty(models.Model):
     name = models.CharField(blank=False, null=False, max_length=100)
     hof = models.ManyToManyField(Teacher, blank=True, related_name='hof')
     staff = models.ManyToManyField(Teacher, blank=True)
-
+    def __str__(self):
+        return self.name
 
 class Department(models.Model):
     name = models.CharField(blank=False, null=False, max_length=100)
@@ -183,7 +184,8 @@ class Department(models.Model):
     hod = models.ManyToManyField(Teacher, blank=True, related_name='hod')
     staff = models.ManyToManyField(Teacher, blank=True)
     code = models.CharField(max_length=2, blank=False, null=True, unique=True)
-
+    def __str__(self):
+        return self.name
 
 class Marksheet(models.Model):
     name = models.CharField(blank=False, null=False, max_length=100)
@@ -212,3 +214,24 @@ class CSVDoc(models.Model):
     description = models.CharField(max_length=255, blank=True)
     document = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+class MarksheetDeptAlias(models.Model):
+    """ The SIMs Marksheets use a range of different conventions for naming.
+    This is designed to clean it up a little."""
+    sims_name = models.CharField(blank=False, null=False, max_length=100)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, blank=True, null=True)
+    def __str__(self):
+        if self.department:
+            return self.sims_name + str(self.department)
+
+        else:
+            return self.sims_name + (' not linked')
+
+class ABOB(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False, null=False)
+    created = models.DateField(default=datetime.date.today, blank=False, null=False)
+    marksheet_alias = models.ForeignKey(MarksheetDeptAlias, on_delete=models.SET_NULL, blank=False, null=True)
+    AB_value = models.IntegerField(blank=False, null=True)
+    OB_value = models.IntegerField(blank=False, null=True)
+

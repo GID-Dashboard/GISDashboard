@@ -1,8 +1,8 @@
-import csv, re
+import csv, re, datetime
 from openpyxl import load_workbook
 from django.contrib.auth.models import User, Group
 from .models import Student, TutorGroup, House, SummativeDefinition, SummativeData, AptitudinalData, TeachingGroup, \
-    YearGroup
+    YearGroup, ABOB, MarksheetDeptAlias
 
 
 def processstudent(path):
@@ -138,13 +138,13 @@ def is_number(s):
 
 
 # Openpyxl:
-def process_fac_marksheet(path):
+def process_fac_marksheet(path, effective_date=datetime.date.today()):
     wb = load_workbook(path)
 
     # Iterate over the sheets
     for sheet in wb:
         rownumber = 0
-
+        print("Currnetly on sheet" + str(sheet))
         # Set a list of each column row
         column_headings = []
         # Iterate over rows
@@ -171,12 +171,12 @@ def process_fac_marksheet(path):
                     record_type = str(column_headings[column_number])
                     record[record_type] = column.value
                     column_number = column_number + 1
-                addrecord(record)
+                addrecord(record, effective_date)
 
             rownumber = rownumber + 1
 
 
-def addrecord(record):
+def addrecord(record, effective_date):
     """ Adds a student's FAC record to the database, using a dictionary
     where keys = names of assessment areas and values are direct
     value to store in database. """
@@ -191,7 +191,7 @@ def addrecord(record):
 
         if created:
             print('Created and deleted student with Admission no: ' + student.student_id)
-
+        print(student.student_id)
         for data_point in record:
 
             # Skip blank records
@@ -205,20 +205,38 @@ def addrecord(record):
                     teaching_group.set_year_and_departmnet()
 
                 student.teachinggroup_set.add(teaching_group)
-
+                continue
             # The following should be done by the Students import, not marksheets.
             if data_point == 'Reg Group':
-                pass
+                continue
 
             if data_point == 'EAL':
-                pass
+                continue
 
             if data_point == 'Reg Group':
-                pass
+                continue
 
             if data_point == 'Surname Forename':
-                pass
+                continue
 
+            # Deal with OBs:
+            if re.search(r'(^.*)\s\| (OB|AB)', data_point):
+                if is_number(record[data_point]):
+                    subject = re.search(r'(^.*)\s\| (OB|AB)', data_point)[1]
+                    ab_or_ob = re.search(r'(^.*)\s\| (OB|AB)', data_point)[2]
+                    ms_dept_alias, created = MarksheetDeptAlias.objects.get_or_create(sims_name=subject)
+
+                    abob_instance, created = ABOB.objects.get_or_create(student=student,
+                                                                        created=effective_date,
+                                                                        marksheet_alias=ms_dept_alias)
+                    if ab_or_ob == 'AB':
+                        abob_instance.AB_value = record[data_point]
+
+                    if ab_or_ob == 'OB':
+                        abob_instance.OB_value = record[data_point]
+
+                    abob_instance.save()
+                    continue
             # To enable us to record letter grades.
             else:
                 data_aspect, created = SummativeDefinition.objects.get_or_create(name=data_point)
@@ -231,17 +249,16 @@ def addrecord(record):
                     student_record = student_db_data_records[0]
                     if student_record.letter_value != record[data_point]:
                         data = SummativeData.objects.create(student=student,
-                                                     data=data_aspect,
-                                                     raw_value=record[data_point])
+                                                            data=data_aspect,
+                                                            raw_value=record[data_point])
                         data.value_from_raw()
 
                 else:
 
                     data = SummativeData.objects.create(student=student,
-                                                 data=data_aspect,
-                                                 raw_value=record[data_point])
+                                                        data=data_aspect,
+                                                        raw_value=record[data_point])
                     data.value_from_raw()
-
 
 
 def add_CAT4_table():
