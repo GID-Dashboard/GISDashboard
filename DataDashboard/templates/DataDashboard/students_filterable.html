@@ -1,0 +1,89 @@
+{% extends "DataDashboard/base.html" %}
+{% load staticfiles %}
+{% block style %}
+    <style type="text/css">
+    .properties_table{
+       min-height: 540px;
+       font-size: 14px;
+    }
+    </style>
+{% endblock %}
+{% block content %}
+    <section class="site_filter">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-2 col-2">
+                    <div class="form-group">
+                        <label for="tutor_group">Tutor Group</label>
+                        <select class="form-control" id="tutor_group"
+                            url = "{%url 'DataDashboard:get_tutor_groups' %}">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-2 col-2">
+                    <div class="form-group">
+                        <label for="sort_by">Sort By</label>
+                        <select class="form-control" id="sort_by">
+                            <option selected="true"
+                            disabled="disabled" value = "none">Choose option</option>
+                            <option value='name'>Name</option>
+                            <option value='student_id'>Student ID</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-2 col-2">
+                    <div class="row justify-content-center align-self-center"
+                        style="color:white; margin-top:30px;">
+                        <a class="btn btn-secondary" id="display_all">Display all</a>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+    <br />
+    <section>
+        <div class="container-fluid">
+            <div id = "result-count" class="text-right">
+                <span class='font-weight-bold'></span> results found.
+            </div>
+            <div class="row properties_table justify-content-center">
+                <div id = "no_results">
+                    <h5>No results found</h5>
+                </div>
+                <table class="table table-bordered table-responsive table-hover table-striped"
+                 id="list_data" data-toggle="table" url = "{% url 'DataDashboard:listing' %}">
+                    <thead>
+                        <tr>
+                            <th data-field="student_id">Student ID</th>
+                            <th data-field="first_name">First Name</th>
+                            <th data-field="last_name">Last Name</th>
+                            <th data-field="tutor_group">Tutor Group</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="listing">
+                    </tbody>
+                </table>
+            </div>
+            <div class="row justify-content-center">
+                <nav aria-label="navigation">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <button class="btn btn-primary page-link" id="previous">Previous</button>
+                        </li>
+                        <li class="page-item pull-right">
+                            <button class="btn btn-primary page-link" id="next">Next</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'js/students.js' %}" type="text/javascript">
+    </script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'DataDashboard/base.html' %}
+
+{% block content %}
+  <form method="get">
+    {{ filter.form.as_p }}
+    <button type="submit">Search</button>
+  </form>
+
+    <form method="post" action="{% url "DataDashboard:add_intervention" %}">
+  {% csrf_token %}
+  <table>
+
+
+      <thead>
+        <tr>
+            <td></td>
+            <td>Name</td>
+            <td>Tutor Group</td>
+            <td>House</td>
+            <td>SEN Status</td>
+            <td>EAL Status</td>
+        </tr>
+      </thead>
+        <tbody>
+        {% for student in filter.qs %}
+            <tr>
+                <td>
+                    <div class="checkbox">
+                    <label><input type="checkbox" name="student_id_{{ student.student_id }}" value="{{ student.student_id }}"></label>
+                    </div>
+                </td>
+                <td>{{ student.full_name }}</td>
+                <td>{{ student.tutor_group_id }}</td>
+                <td>{{ student.house_id }}</td>
+                <td>{{ student.SEN_status }}</td>
+                <td>{{ student.EAL_status }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+
+  </table>
+    <button type="submit">Submit</button>
+    </form>
+
+{% endblock %}

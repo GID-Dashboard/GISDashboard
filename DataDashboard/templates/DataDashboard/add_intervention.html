@@ -1,0 +1,17 @@
+{% extends "DataDashboard/base.html" %}
+{% block content %}
+
+You are adding an intervention for:
+    <ul>
+    {% for student in students %}
+    <li>{{ student.full_name }} ({{ student.tutor_group_id }})</li>
+
+    {% endfor %}
+     </ul>
+    <form method="post">
+    {% csrf_token %}
+    {{ form.media }}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+    </form>
+{% endblock content %}

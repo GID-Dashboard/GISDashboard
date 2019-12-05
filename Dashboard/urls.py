@@ -18,5 +18,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('db/', include('DataDashboard.urls', namespace='DataDashboard'))
+    path('db/', include('DataDashboard.urls', namespace='DataDashboard')),
 ]

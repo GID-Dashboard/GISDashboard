@@ -1,8 +1,7 @@
 import csv, re
 from openpyxl import load_workbook
 from django.contrib.auth.models import User, Group
-from .models import Student, TutorGroup, House, SummativeDefinition, SummativeData, AptitudinalData, TeachingGroup, \
-    YearGroup
+from .models import *
 
 
 def processstudent(path):
@@ -240,6 +239,49 @@ def addrecord(record):
                     data.value_from_raw()
 
 
+def add_all_records(record):
+    """ The previous function will try to do some clever thigns to add data to
+    different tables. This one dumps everything in one single table,
+    so we can sort it all out through Power BI queries. """
+
+    if record['Admission No.']:
+        try:
+            student, created = Student.objects.get_or_create(student_id=record['Admission No.'])
+        except(KeyError):
+            print('Tried to add a record with no Admission no on record' + str(record))
+            return False
+
+        if created:
+            print('Created and deleted student with Admission no: ' + student.student_id)
+
+        for data_point in record:
+
+            # Skip blank records
+            if not record[data_point]:
+                continue
+
+            data_aspect, created = SummativeDefinition.objects.get_or_create(name=data_point)
+            student_db_data_records = SummativeData.objects.filter(data=data_aspect,
+                                                                   student=student,
+                                                                   ). \
+                order_by('-date')
+
+            if student_db_data_records:  # record exists
+                student_record = student_db_data_records[0]
+                if student_record.letter_value != record[data_point]:
+                    data = SummativeData.objects.create(student=student,
+                                                 data=data_aspect,
+                                                 raw_value=record[data_point])
+                    data.value_from_raw()
+
+            else:
+
+                data = SummativeData.objects.create(student=student,
+                                             data=data_aspect,
+                                             raw_value=record[data_point])
+                data.value_from_raw()
+
+
 
 def add_CAT4_table():
     labels = ["CAT4 Verbal SAS",
@@ -260,3 +302,61 @@ def add_CAT4_table():
         if point.name == 'CAT4 Verbal SAS':
             student_a_data.verbal = point.value
             student_a_data.save()
+
+
+def process_teacher(path):
+    with open(path, newline='') as csvfile:
+        next(csvfile, None)
+        teachers = csv.reader(csvfile, delimiter=',', quotechar='|')
+        newteachers = []  # list of all the newly-created students
+
+        # So that this may be a generic importer, we must set headers as the first line.
+        n = 0
+        for row in teachers:
+            if n == 0: # Skip headers
+                n = n + 1
+                continue
+
+            newteacher = {'full_name': row[0],
+                          'primary_email': row[1], #AUTHORATIVE
+                          'staff_code': row[2], #AUTHORATIVE
+                          'UPN': row[3], #AUTHORATIVE
+                          }
+
+            newteachers.append(update_teachers(newteacher))
+            n = n + 1
+        return newteachers
+
+
+def update_teachers(newteacher):
+    teacher, created = Teacher.objects.get_or_create(staff_code=newteacher['staff_code'])
+    teacher.email = newteacher['primary_email']
+    teacher.UPN = newteacher['UPN']
+    teacher.save()
+    print("Added teacher: " + teacher.staff_code)
+
+
+def sync_sims_and_internal_teachers():
+    sims_teachers = SIMSTeacher.objects.all().filter(email_address__isnull=False)
+    for teacher in sims_teachers:
+        print("Processing" + str(teacher.email_address))
+        internal_teacher, created = Teacher.objects.get_or_create(email_address=teacher.email_address)
+        if created:
+            internal_teacher.title_des = teacher.title_des
+            internal_teacher.firstname = teacher.firstname
+            internal_teacher.lastname = teacher.lastname
+            internal_teacher.full_name = teacher.full_name
+            internal_teacher.staff_code = teacher.staff_code
+            internal_teacher.email_address = teacher.email_address
+            internal_teacher.save()
+
+            user, created = User.objects.get_or_create(email=internal_teacher.email_address)
+            teacher_group = Group.objects.get_or_create(name='Teachers')[0]
+            if created:
+                user.first_name = internal_teacher.firstname
+                user.last_name = internal_teacher.lastname
+                user.username = internal_teacher.email_address
+                user.save()
+
+                user.groups.add(teacher_group)
+                print("Created user: " + user.username)

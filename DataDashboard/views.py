@@ -1,32 +1,101 @@
 from django.shortcuts import render, redirect, reverse
-from .models import Teacher
+from .models import SIMSStudent
 from .forms import *
+from .filters import *
 from .functions import processstudent
 import os
 # Create your views here.
 
-def splash(request):
-    pass
+from django.http import JsonResponse
+from django.shortcuts import render
+from rest_framework.generics import ListAPIView
+from .serializers import StudentSerializers
+from .pagination import StandardResultsSetPagination
 
 
-def markbook(request):
+def StudentList(request):
+    return render(request, "DataDashboard/students_filterable.html", {})
 
+
+class StudentListing(ListAPIView):
+    # set the pagination and serializer class
+
+    pagination_class = StandardResultsSetPagination
+    serializer_class = StudentSerializers
+
+    def get_queryset(self):
+        # filter the queryset based on the filters applied
+
+        queryList = SIMSStudent.objects.all().order_by('student_id')
+        tutor_group = self.request.query_params.get('tutor_group', None)
+        sort_by = self.request.query_params.get('sort_by', None)
+
+
+        if tutor_group:
+            queryList = queryList.filter(tutor_group=tutor_group)
+
+            # sort it if applied on based on price/points
+
+        if sort_by == "name":
+            queryList = queryList.order_by("name")
+        elif sort_by == "student_id":
+            queryList = queryList.order_by("student_id")
+        return queryList
+
+
+def getTutorGRoups(request):
+    # get all the countreis from the database excluding
+    # null and blank values
+
+    if request.method == "GET" and request.is_ajax():
+        groups = SIMSStudent.objects.exclude(tutor_group__isnull=True)\
+            .order_by('tutor_group').values_list('tutor_group').distinct()
+        groups = [i[0] for i in list(groups)]
+        data = {
+            "groups": groups,
+        }
+        return JsonResponse(data, status=200)
+
+
+
+
+def students(request):
+    students = SIMSStudent.objects.all()
+
+    return render(request, 'DataDashboard/students.html', {'students': students})
+
+
+def search(request):
+    student_list = SIMSStudent.objects.all()
+    user_filter = StudentFilter(request.GET, queryset=student_list)
+    if request.method=='POST':
+        pass
+    return render(request, 'DataDashboard/student_list.html', {'filter': user_filter})
+
+
+def add_intervention(request):
+    user = request.user
     teacher = Teacher.objects.get(user=request.user)
-    return render(request, 'DataDashboard/markbook.html', {'teacher': teacher})
 
+    student_pks = []
+    for key, value in request.POST.items():
+        if 'student_id' in key:
+            student_pks.append(value)
 
-def import_students(request):
-    # Deal with getting a CSV file
+    # Todo; add logic if no students are selected
+    # Todo: add logic for if student is in SIMS but not our DB
+
+    students = Student.objects.filter(student_id__in=student_pks)
 
     if request.method == 'POST':
-        csvform = CSVDocForm(request.POST, request.FILES)
-        if csvform.is_valid():
-            file = csvform.save()
-            path = file.document.path
-            processstudent(path)
-            os.remove(path)
-            file.delete()
-            return redirect(reverse('school:list_students'))
+        intervention_form = InterventionForm(request.POST)
+        if intervention_form.is_valid():
+            intervention = intervention_form.save()
+            intervention.created_by = teacher
+            intervention.save()
+
     else:
-        csvform = CSVDocForm()
-    return render(request, 'DataDashboard/model_form_upload.html', {'csvform': csvform})
+        intervention_form = InterventionForm(initial={'students': students})
+
+    return render(request, 'DataDashboard/add_intervention.html', {'students': students,
+                                                                   'form': intervention_form})

@@ -1,0 +1,8 @@
+{% extends "DataDashboard/base.html" %}
+{% block content %}
+<ul>
+    {% for student in students %}
+    <li>{{ student }}</li>
+    {% endfor %}
+</ul>
+{% endblock content %}

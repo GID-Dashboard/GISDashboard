@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 import datetime
 
 
@@ -10,13 +10,18 @@ class House(models.Model):
 
 class Teacher(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-    house = models.ForeignKey(House, blank=True, null=True, on_delete=models.SET_NULL)
-    first_name = models.CharField(blank=False, null=False, max_length=100)
-    last_name = models.CharField(blank=False, null=False, max_length=100)
-    salutation = models.CharField(blank=False, null=False, max_length=20)
-    staff_code = models.CharField(blank=False, null=False, max_length=5)
-    email = models.EmailField(blank=True, null=True)
-    position = models.CharField(blank=False, null=False, max_length=5)
+    title_des = models.CharField(max_length= 100, blank=True, null=True)
+    firstname = models.CharField(max_length= 500, blank=True, null=True)
+    lastname = models.CharField(max_length= 500, blank=True, null=True)
+    full_name = models.CharField(max_length= 500, blank=True, null=True)
+    staff_code = models.CharField(max_length= 10, blank=True, null=True)
+    email_address = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return self.full_name
+
+    class Meta:
+        ordering = ['staff_code']
 
 
 class YearGroup(models.Model):
@@ -40,6 +45,9 @@ class TutorGroup(models.Model):
     tutor = models.ForeignKey('Teacher', blank=True, null=True, on_delete=models.SET_NULL)
     year_group = models.ForeignKey(YearGroup, blank=False, null=True, on_delete=models.SET_NULL)
 
+    def __str__(self):
+        return self.group_name
+
 
 class Student(models.Model):
     user = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL)
@@ -57,6 +65,14 @@ class Student(models.Model):
     parent_salutation = models.CharField(blank=True, null=True, max_length=150)
     student_email = models.EmailField(blank=True, null=True)
 
+    def full_name(self):
+        return self.first_name + " " + self.last_name
+
+    def __str__(self):
+        return self.first_name + " " + self.last_name + " (" + str(self.tutor_group) + ")"
+
+    class Meta:
+        ordering = ['student_id']
 
 class AttendanceSession(models.Model):
     date = models.DateField(blank=False, null=False)
@@ -200,3 +216,86 @@ class CSVDoc(models.Model):
     description = models.CharField(max_length=255, blank=True)
     document = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+class SIMSStudent(models.Model):
+
+    id = models.IntegerField(primary_key=True, null=False)
+    student_id=models.IntegerField()
+    first_name=models.CharField(max_length=1000)
+    last_name=models.CharField(max_length=1000)
+    preferred_forename=models.CharField(max_length=1000)
+    gender=models.CharField(max_length=1000)
+    parent_email=models.EmailField(max_length=1000)
+    parent_salutation=models.CharField(max_length=1000)
+    student_email=models.EmailField(max_length=1000)
+    house_id=models.CharField(max_length=1000)
+    tutor_group_id=models.CharField(max_length=1000)
+    full_name=models.CharField(max_length=1000)
+    EAL_status=models.CharField(max_length=1000)
+    SEN_status=models.CharField(max_length=1000)
+    exam_candidate_number=models.CharField(max_length=1000)
+
+    class Meta:
+        managed = False
+        db_table = 'sims].[DataDashboard_student'
+
+    def __str__(self):
+        return self.full_name + " (" + self.tutor_group_id + ")"
+
+
+class SIMSSubject(models.Model):
+    id = models.IntegerField(primary_key=True)
+    Subject = models.CharField(max_length=1000)
+
+    class Meta:
+        managed = False
+        db_table = 'sims].[DataDashboard_subject'
+
+
+class SIMSTeachingGroup(models.Model):
+    id = models.IntegerField(primary_key=True)
+    teaching_group = models.CharField(max_length=1000)
+    subject_code = models.ForeignKey('SIMSSubject', on_delete=models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'sims].[DataDashboard_teachinggroup'
+
+
+class SIMSTeacher(models.Model):
+    id = models.IntegerField(blank=False, null=False, primary_key=True)
+    title_des = models.CharField(max_length= 100, blank=True, null=True)
+    firstname = models.CharField(max_length= 500, blank=True, null=True)
+    lastname = models.CharField(max_length= 500, blank=True, null=True)
+    full_name = models.CharField(max_length= 500, blank=True, null=True)
+    staff_code = models.CharField(max_length= 10, blank=True, null=True)
+    email_address = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return self.full_name
+
+    class Meta:
+        managed = False
+        db_table = 'sims].[DataDashboard_teachers'
+        ordering = ['staff_code']
+
+
+class TeachingStrategy(models.Model):
+    students = models.ManyToManyField(Student)
+    strategy = models.TextField(blank=False, null=True)
+    created_by = models.ForeignKey(Teacher, on_delete=models.SET_NULL, blank=True, null=True)
+    created = models.DateField(blank=False, null=False, default=datetime.date.today)
+
+
+class TeachingStrategyResources(models.Model):
+    strategy = models.ForeignKey(TeachingStrategy, on_delete=models.CASCADE)
+    link = models.URLField(blank=False, null=False)
+    title = models.CharField(max_length=260, blank=False, null=False)
+
+
+class TeachingStrategyComment(models.Model):
+    strategy = models.ForeignKey(TeachingStrategy, on_delete=models.CASCADE)
+    students = models.ManyToManyField(Student)
+    comment = models.TextField(blank=True, null=True)
+    vote = models.IntegerField(blank=True, null=True)
