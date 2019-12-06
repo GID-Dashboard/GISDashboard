@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'DataDashboard',
     'rest_framework',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,4 @@ STATICFILES_DIRS = [
 # For correctly routing sims queries to sims db
 
 DATABASE_ROUTERS = ('DataDashboard.router.SimsRouter',)
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

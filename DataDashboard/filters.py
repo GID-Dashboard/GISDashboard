@@ -1,4 +1,4 @@
-from .models import SIMSStudent, SIMSTeachingGroup
+from .models import SIMSStudent, TeachingStrategy
 import django_filters
 
 class StudentFilter(django_filters.FilterSet):
@@ -12,3 +12,13 @@ class StudentFilter(django_filters.FilterSet):
     class Meta:
         model = SIMSStudent
         fields = ['first_name', 'last_name', 'tutor_group_id', 'house_id']
+
+
+class StrategyFilter(django_filters.FilterSet):
+    category__name = django_filters.CharFilter(lookup_expr='icontains')
+    strategy = django_filters.CharFilter(lookup_expr='icontains')
+    created_by__full_name = django_filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = TeachingStrategy
+        fields = ['category', 'strategy', 'created_by']

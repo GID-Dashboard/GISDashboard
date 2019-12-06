@@ -39,6 +39,9 @@ class YearGroup(models.Model):
 
         self.save()
 
+    def __str__(self):
+        return self.year
+
 
 class TutorGroup(models.Model):
     group_name = models.CharField(blank=False, null=False, max_length=100)
@@ -74,6 +77,7 @@ class Student(models.Model):
     class Meta:
         ordering = ['student_id']
 
+
 class AttendanceSession(models.Model):
     date = models.DateField(blank=False, null=False)
     period = models.IntegerField(blank=False, null=False)
@@ -85,6 +89,8 @@ class TeachingGroup(models.Model):
     teachers = models.ManyToManyField(Teacher, blank=True)
     students = models.ManyToManyField(Student, blank=True)
 
+    def __str__(self):
+        return saelf.name
 
 class ClassAtttenanceSession(models.Model):
     attendance_session = models.ForeignKey(AttendanceSession, blank=False, null=False, on_delete=models.CASCADE)
@@ -181,6 +187,9 @@ class Faculty(models.Model):
     hof = models.ManyToManyField(Teacher, blank=True, related_name='hof')
     staff = models.ManyToManyField(Teacher, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Department(models.Model):
     name = models.CharField(blank=False, null=False, max_length=100)
@@ -188,12 +197,18 @@ class Department(models.Model):
     hod = models.ManyToManyField(Teacher, blank=True, related_name='hod')
     staff = models.ManyToManyField(Teacher, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Marksheet(models.Model):
     name = models.CharField(blank=False, null=False, max_length=100)
     factulty = models.ForeignKey(Faculty, blank=True, null=True, on_delete=models.SET_NULL)
     department = models.ForeignKey(Department, blank=True, null=True, on_delete=models.SET_NULL)
     classgroups = models.ManyToManyField(TeachingGroup, blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 class MarksheetFields(models.Model):
@@ -203,6 +218,9 @@ class MarksheetFields(models.Model):
     max_score = models.IntegerField(blank=True, null=True)
     min_score = models.IntegerField(blank=True, null=True)
     increment = models.FloatField(blank=False, null=False, default=1)
+
+    def __str__(self):
+        return self.name
 
 class MarksheetData(models.Model):
     field = models.ForeignKey(MarksheetFields, on_delete=models.CASCADE, blank=False, null=False)
@@ -281,21 +299,42 @@ class SIMSTeacher(models.Model):
         ordering = ['staff_code']
 
 
+class TeachingStrategyCategory(models.Model):
+    name = models.CharField(max_length=200, blank=False, null=False, unique=True)
+
+    def __str__(self):
+        return self.name
+
 class TeachingStrategy(models.Model):
     students = models.ManyToManyField(Student)
+    category = models.ForeignKey(TeachingStrategyCategory, on_delete=models.SET_NULL, blank=False, null=True)
     strategy = models.TextField(blank=False, null=True)
     created_by = models.ForeignKey(Teacher, on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateField(blank=False, null=False, default=datetime.date.today)
 
+    def __str__(self):
+        return str(self.category)+ str(self.pk)
 
 class TeachingStrategyResources(models.Model):
     strategy = models.ForeignKey(TeachingStrategy, on_delete=models.CASCADE)
     link = models.URLField(blank=False, null=False)
     title = models.CharField(max_length=260, blank=False, null=False)
 
+    def __str__(self):
+        return self.title
+
 
 class TeachingStrategyComment(models.Model):
+    VOTE_CHOICES = [
+        (1, 'Upvote'),
+        (-1, 'Downvote'),
+    ]
     strategy = models.ForeignKey(TeachingStrategy, on_delete=models.CASCADE)
     students = models.ManyToManyField(Student)
     comment = models.TextField(blank=True, null=True)
-    vote = models.IntegerField(blank=True, null=True)
+    vote = models.IntegerField(blank=True, null=True, choices=VOTE_CHOICES)
+    date = models.DateField(blank=False, null=False, default=datetime.date.today)
+    author = models.ForeignKey(Teacher, blank=False, null=True, on_delete=models.SET)
+
+    def __str__(self):
+        return "strategy" + str(self.pk)

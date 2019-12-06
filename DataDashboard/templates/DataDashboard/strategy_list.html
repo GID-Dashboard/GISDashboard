@@ -1,0 +1,52 @@
+{% extends 'DataDashboard/base.html' %}
+{% load crispy_forms_tags %}
+{% block import_js %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+
+{% endblock import_js %}
+{% block content %}
+    <div class="well">
+  <form method="get">
+    {{ filter.form | crispy}}
+    <button type="submit">Search</button>
+  </form>
+    </div>
+
+  <table id="intervention_table">
+
+
+      <thead>
+        <tr>
+            <td>Category</td>
+            <td>Strategy</td>
+            <td>Students involved</td>
+            <td>Created on</td>
+            <td>Created by</td>
+        </tr>
+      </thead>
+        <tbody>
+        {% for strategy in filter.qs %}
+            <tr>
+                <td>{{ strategy.category}}</td>
+                <td><a href="{% url 'DataDashboard:view_strategy' strategy.pk %}">{{ strategy.strategy }}</a></td>
+                <td>{% for student in strategy.students.all %}{{ student }} {% endfor %}</td>
+                <td>{{ strategy.created }}</td>
+                <td>{{ strategy.created_by }}</td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+
+  </table>
+    <button type="submit">Submit</button>
+    </form>
+
+{% endblock %}
+{% block script %}
+
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+
+    <script>$(document).ready( function () {
+    $('#intervention_table').DataTable();
+} );</script>
+{% endblock script %}

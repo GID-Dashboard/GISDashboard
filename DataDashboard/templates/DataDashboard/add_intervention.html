@@ -1,5 +1,6 @@
 {% extends "DataDashboard/base.html" %}
-{% block content %}
+{% block content %}{% load crispy_forms_tags %}
+
 
 You are adding an intervention for:
     <ul>
@@ -11,7 +12,9 @@ You are adding an intervention for:
     <form method="post">
     {% csrf_token %}
     {{ form.media }}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
+    {{ form | crispy }}
+    <button type="submit" name="save" value="save">Save</button>
+    <button type="submit" name="add_resource" value="add_resource">Save</button>
+
     </form>
 {% endblock content %}

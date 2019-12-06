@@ -20,6 +20,23 @@ class InterventionForm(forms.ModelForm):
         }
 
 
+class InterventionResourceForm(forms.ModelForm):
+
+    class Meta:
+        model = TeachingStrategyResources
+        fields = {'title', 'link'}
+
+
+class InterventionCommentForm(forms.ModelForm):
+    field_order = ['comment', 'vote']
+    class Meta:
+        model = TeachingStrategyComment
+        fields = {'comment', 'vote'}
+        widgets = {'vote': forms.RadioSelect,
+                   }
+
+
+
 class StudentAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !

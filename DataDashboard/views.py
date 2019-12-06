@@ -74,7 +74,6 @@ def search(request):
 
 
 def add_intervention(request):
-    user = request.user
     teacher = Teacher.objects.get(user=request.user)
 
     student_pks = []
@@ -87,15 +86,59 @@ def add_intervention(request):
 
     students = Student.objects.filter(student_id__in=student_pks)
 
-    if request.method == 'POST':
-        intervention_form = InterventionForm(request.POST)
-        if intervention_form.is_valid():
-            intervention = intervention_form.save()
-            intervention.created_by = teacher
-            intervention.save()
+    if (request.method == 'POST') and ('searchform' not in request.POST):
+            intervention_form = InterventionForm(request.POST)
+            if intervention_form.is_valid():
+                intervention = intervention_form.save()
+                intervention.created_by = teacher
+                intervention.save()
+
+                if 'save' in request.POST.items():
+                    # Redirect to intervention overview page
+                    pass
+
+                if 'add_resource' in request.POST.items():
+                    # Redirect to resource page
+                    pass
 
     else:
         intervention_form = InterventionForm(initial={'students': students})
 
     return render(request, 'DataDashboard/add_intervention.html', {'students': students,
                                                                    'form': intervention_form})
+
+def add_resource(request, teaching_strategy_pk):
+
+    strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
+    pass
+
+
+def view_strategy(request, teaching_strategy_pk):
+    strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
+
+    comment_form = InterventionCommentForm()
+
+    if request.method == 'POST':
+        comment_form = InterventionCommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.strategy = strategy
+            comment.author = Teacher.objects.get(user=request.user)
+            comment.save()
+            comment_form = InterventionCommentForm()
+
+    comments = TeachingStrategyComment.objects.filter(strategy=strategy)
+    resources = TeachingStrategyResources.objects.filter(strategy=strategy)
+
+    return render(request, 'DataDashboard/view_strategies.html', {'strategy': strategy,
+                                                                  'comments': comments,
+                                                                  'resources': resources,
+                                                                  'form': comment_form})
+
+
+def find_strategies(request):
+    strategy_list = TeachingStrategy.objects.all()
+    strategy_filter = StrategyFilter(request.GET, queryset=strategy_list)
+    if request.method == 'POST':
+        pass
+    return render(request, 'DataDashboard/strategy_list.html', {'filter': strategy_filter})
