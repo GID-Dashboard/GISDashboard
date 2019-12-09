@@ -24,7 +24,7 @@ SECRET_KEY = '@oc%y0-(ao6_vq1d#uu3&#a=n2v!7m2z&^u6ay(470b@8tft3h'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['172.16.55.247', 'localhost']
+ALLOWED_HOSTS = ['172.16.55.247', 'localhost', 'http://gisdatadashboard.gardenschool.edu.my/']
 
 # Application definition
 
@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'Dashboard.urls'
+ROOT_URLCONF = 'Dashboard.settings.urls'
 
 TEMPLATES = [
     {
