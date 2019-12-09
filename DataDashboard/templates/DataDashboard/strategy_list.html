@@ -22,6 +22,7 @@
             <td>Students involved</td>
             <td>Created on</td>
             <td>Created by</td>
+            <td></td>
         </tr>
       </thead>
         <tbody>
@@ -32,6 +33,8 @@
                 <td>{% for student in strategy.students.all %}{{ student }} {% endfor %}</td>
                 <td>{{ strategy.created }}</td>
                 <td>{{ strategy.created_by }}</td>
+                <td><a href="{% url "DataDashboard:delete_strategy" strategy.pk %}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+</td>
 
             </tr>
         {% endfor %}

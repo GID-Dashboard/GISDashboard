@@ -38,12 +38,21 @@
             {% if request.user|has_group:"Teachers" %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Teacher Resources</a>
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dashboards</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Timetable</a>
-                        <a class="dropdown-item" href="#">Add an exam</a>
-                        <a class="dropdown-item" href="#}">Suspend
-                            multiple days</a>
+                        <a class="dropdown-item" href="{% url "DataDashboard:report_dashboard" %}">Student Report Explorer</a>
+                        <a class="dropdown-item disabled" href="#">Coming soon</a>
+
+                    </div>
+                </li>
+                                <li class="nav-item dropdown">
+
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Interventions</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url "DataDashboard:student_search" %}">Add an intervention</a>
+                        <a class="dropdown-item" href="{% url "DataDashboard:find_strategies" %}">List interventions</a>
+
                     </div>
                 </li>
             {% endif %}
@@ -72,10 +81,9 @@
             {% if user.is_authenticated %}
                 <li class="nav-item"><a class="nav-link"
                                         href="/accounts/profile">{{ user.first_name }} {{ user.last_name }}</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"}?next=/"> Log out </a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/logout"> Log out </a></li>
             {% else %}
-                <a class='btn btn-default' href="#"><i
-                        class="fab fa-google-plus-g"></i>Login</a>
+                <a class='btn btn-default' href="{% url "social:begin" "google-oauth2" %}"><i class="fab fa-google"></i>Login</a>
             {% endif %}
         </ul>
     </div>

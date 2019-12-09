@@ -1,0 +1,21 @@
+{% extends "DataDashboard/base.html" %}
+{% block content %}
+<h1>Delete {{ strategy.category }} Strategy</h1>
+
+Your are deleting the following strategy:
+<table>
+    <tr>
+        <td>Students</td>
+        <td>{%for student in strategy.students.all %}{{ student }}{% endfor %}</td>
+    </tr>
+    <tr>
+        <td>Strategy</td>
+        <td>{{ strategy.strategy }}</td>
+    </tr>
+    </tbody>
+</table>
+
+<a class="btn btn-danger" href="{% url "DataDashboard:confirm_delete_strategy" strategy.pk %}" role="button">Confirm Delete</a>
+<a class="btn btn-primary" href="{% url "DataDashboard:find_strategies" %}">Go back</a>
+
+{% endblock content %}
