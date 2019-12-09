@@ -5,9 +5,10 @@ from .filters import *
 from .functions import processstudent
 import os
 # Create your views here.
+from django.contrib import messages
 
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, resolve_url
 from rest_framework.generics import ListAPIView
 from .serializers import StudentSerializers
 from .pagination import StandardResultsSetPagination
@@ -142,4 +143,36 @@ def find_strategies(request):
     if request.method == 'POST':
         pass
     return render(request, 'DataDashboard/strategy_list.html', {'filter': strategy_filter})
+
+
+def delete_strategy(request, teaching_strategy_pk):
+    strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
+
+    if (request.user == strategy.created_by.user) | request.user.is_superuser:
+        return render(request, "DataDashboard/delete_strategy.html", {'strategy': strategy})
+
+    else:
+        messages.add_message(request, messages.ERROR, "You must be the creator of a strategy to delete it.")
+        return redirect(reverse("DataDashboard:permission_error"))
+
+
+def confirmed_delete_strategy(request, teaching_strategy_pk):
+    strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
+
+    if (request.user == strategy.created_by.user) | request.user.is_superuser:
+        strategy.delete()
+        messages.add_message(request, messages.SUCCESS, "Strategy deleted successfully")
+        return redirect(reverse("DataDashboard:find_strategies"))
+
+    else:
+        return redirect(reverse("DataDashboard:permission_error"))
+
+
+def permission_error(request):
+    return render(request, "DataDashboard/permission_error.html")
+
+
+def report_dashboard(request):
+    return render(request, "DataDashboard/report_dashboard.html")
+
 
