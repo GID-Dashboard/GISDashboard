@@ -9,7 +9,7 @@ class StudentFilter(django_filters.FilterSet):
     teaching_group_choices = list(TeachingGroup.objects.all().values_list('name', 'name').distinct().order_by('name'))
     tutor_group_id = django_filters.MultipleChoiceFilter(choices=tg_choices)
     house_id = django_filters.MultipleChoiceFilter(choices=house_choices)
-    teaching_group = django_filters.ChoiceFilter(choices=teaching_group_choices)
+    teachinggroup = django_filters.ChoiceFilter(choices=teaching_group_choices)
 
     class Meta:
         model = SIMSStudent

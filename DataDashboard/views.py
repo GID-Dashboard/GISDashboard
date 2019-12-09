@@ -142,3 +142,5 @@ def find_strategies(request):
     if request.method == 'POST':
         pass
     return render(request, 'DataDashboard/strategy_list.html', {'filter': strategy_filter})
+
+
