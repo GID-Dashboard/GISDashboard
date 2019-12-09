@@ -18,7 +18,11 @@ class Teacher(models.Model):
     email_address = models.EmailField(blank=True, null=True)
 
     def __str__(self):
-        return self.full_name
+        if self.full_name:
+            return self.full_name
+
+        else:
+            return self.staff_code
 
     class Meta:
         ordering = ['staff_code']
