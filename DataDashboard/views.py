@@ -143,4 +143,3 @@ def find_strategies(request):
         pass
     return render(request, 'DataDashboard/strategy_list.html', {'filter': strategy_filter})
 
-
