@@ -3,9 +3,9 @@ from .settings import *
 DATABASES = {
      'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gis_datadb',
-        'USER': 'dashboard',
-        'PASSWORD': 'r3q0DO&0#r9g@dkZtHCoFMY6',
+        'NAME': 'DataDashboard',
+        'USER': 'dashboardadm',
+        'PASSWORD': '@dmDashb0ard',
         'HOST': 'localhost',
         'PORT': '5432',
     },
