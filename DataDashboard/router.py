@@ -1,6 +1,6 @@
-from DataDashboard.models import SIMSStudent, SIMSTeachingGroup, SIMSTeacher
+from DataDashboard.models import Student, TeachingGroup, SIMSTeacher
 
-ROUTED_MODELS = [SIMSStudent, SIMSTeachingGroup, SIMSTeacher]
+ROUTED_MODELS = [Student, TeachingGroup, SIMSTeacher]
 
 class SimsRouter(object):
 

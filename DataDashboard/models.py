@@ -56,7 +56,7 @@ class TutorGroup(models.Model):
         return self.group_name
 
 
-class Student(models.Model):
+class LocalStudent(models.Model):
     user = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL)
     student_id = models.IntegerField(blank=True, null=True, unique=True)
     first_name = models.CharField(blank=False, null=False, max_length=100)
@@ -88,13 +88,13 @@ class AttendanceSession(models.Model):
     phase = models.CharField(blank=False, null=False, max_length=20)
 
 
-class TeachingGroup(models.Model):
+class LocalTeachingGroup(models.Model):
     name = models.CharField(blank=False, null=False, max_length=20)
     teachers = models.ManyToManyField(Teacher, blank=True)
-    students = models.ManyToManyField(Student, blank=True)
+    students = models.ManyToManyField(LocalStudent, blank=True)
 
     def __str__(self):
-        return saelf.name
+        return self.name
 
 class ClassAtttenanceSession(models.Model):
     attendance_session = models.ForeignKey(AttendanceSession, blank=False, null=False, on_delete=models.CASCADE)
@@ -103,7 +103,7 @@ class ClassAtttenanceSession(models.Model):
 
 
 class ConductReport(models.Model):
-    student = models.ForeignKey(Student, blank=False, null=False, on_delete=models.CASCADE)
+    student = models.ForeignKey(LocalStudent, blank=False, null=False, on_delete=models.CASCADE)
     teacher_assigning = models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
     date = models.DateField(blank=False, null=False)
     type = models.CharField(blank=False, null=False, max_length=100)
@@ -112,7 +112,7 @@ class ConductReport(models.Model):
 
 
 class AttiudinalData(models.Model):
-    student = models.ForeignKey(Student, blank=False, null=False, on_delete=models.CASCADE)
+    student = models.ForeignKey(LocalStudent, blank=False, null=False, on_delete=models.CASCADE)
     date = models.DateField(blank=False, null=False)
     pass1 = models.IntegerField(blank=True, null=True)
     pass2 = models.IntegerField(blank=True, null=True)
@@ -126,7 +126,7 @@ class AttiudinalData(models.Model):
 
 
 class AptitudinalData(models.Model):
-    student = models.ForeignKey(Student, blank=False, null=False, on_delete=models.CASCADE)
+    student = models.ForeignKey(LocalStudent, blank=False, null=False, on_delete=models.CASCADE)
     date = models.DateField(blank=False, null=False)
     verbal = models.IntegerField(blank=True, null=True)
     non_verbal = models.IntegerField(blank=True, null=True)
@@ -148,7 +148,7 @@ class SummativeDefinition(models.Model):
 
 class SummativeData(models.Model):
     data = models.ForeignKey(SummativeDefinition, blank=False, null=False, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, blank=False, null=False, on_delete=models.CASCADE)
+    student = models.ForeignKey(LocalStudent, blank=False, null=False, on_delete=models.CASCADE)
     date = models.DateField(blank=False, null=False, default=datetime.date.today)
     value = models.FloatField(blank=False, null=True)
     letter_value = models.CharField(max_length=20, blank=True, null=True)
@@ -209,7 +209,7 @@ class Marksheet(models.Model):
     name = models.CharField(blank=False, null=False, max_length=100)
     factulty = models.ForeignKey(Faculty, blank=True, null=True, on_delete=models.SET_NULL)
     department = models.ForeignKey(Department, blank=True, null=True, on_delete=models.SET_NULL)
-    classgroups = models.ManyToManyField(TeachingGroup, blank=True)
+    classgroups = models.ManyToManyField(LocalTeachingGroup, blank=True)
 
     def __str__(self):
         return self.name
@@ -228,7 +228,7 @@ class MarksheetFields(models.Model):
 
 class MarksheetData(models.Model):
     field = models.ForeignKey(MarksheetFields, on_delete=models.CASCADE, blank=False, null=False)
-    student = models.ForeignKey(Student, blank=False, null=False, on_delete=models.CASCADE)
+    student = models.ForeignKey(LocalStudent, blank=False, null=False, on_delete=models.CASCADE)
     date = models.DateField(blank=False, null=False)
     numerical_value = models.FloatField(blank=True, null=True)
     text_value = models.TextField(blank=True, null=True)
@@ -240,7 +240,7 @@ class CSVDoc(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
-class SIMSStudent(models.Model):
+class Student(models.Model):
 
     id = models.IntegerField(primary_key=True, null=False)
     student_id=models.IntegerField()
@@ -257,6 +257,7 @@ class SIMSStudent(models.Model):
     EAL_status=models.CharField(max_length=1000)
     SEN_status=models.CharField(max_length=1000)
     exam_candidate_number=models.CharField(max_length=1000)
+    teachinggroup = models.ManyToManyField('TeachingGroup', db_table='sims].[DataDashboard_students_teachinggroup')
 
     class Meta:
         managed = False
@@ -275,10 +276,11 @@ class SIMSSubject(models.Model):
         db_table = 'sims].[DataDashboard_subject'
 
 
-class SIMSTeachingGroup(models.Model):
+class TeachingGroup(models.Model):
     id = models.IntegerField(primary_key=True)
     teaching_group = models.CharField(max_length=1000)
     subject_code = models.ForeignKey('SIMSSubject', on_delete=models.DO_NOTHING)
+
 
     class Meta:
         managed = False
@@ -293,6 +295,7 @@ class SIMSTeacher(models.Model):
     full_name = models.CharField(max_length= 500, blank=True, null=True)
     staff_code = models.CharField(max_length= 10, blank=True, null=True)
     email_address = models.EmailField(blank=True, null=True)
+    teachinggroup = models.ManyToManyField(TeachingGroup)
 
     def __str__(self):
         return self.full_name
@@ -310,7 +313,7 @@ class TeachingStrategyCategory(models.Model):
         return self.name
 
 class TeachingStrategy(models.Model):
-    students = models.ManyToManyField(Student)
+    students = models.ManyToManyField(LocalStudent)
     category = models.ForeignKey(TeachingStrategyCategory, on_delete=models.SET_NULL, blank=False, null=True)
     strategy = models.TextField(blank=False, null=True)
     created_by = models.ForeignKey(Teacher, on_delete=models.SET_NULL, blank=True, null=True)
@@ -337,7 +340,7 @@ class TeachingStrategyComment(models.Model):
         (-1, 'Downvote'),
     ]
     strategy = models.ForeignKey(TeachingStrategy, on_delete=models.CASCADE)
-    students = models.ManyToManyField(Student)
+    students = models.ManyToManyField(LocalStudent)
     comment = models.TextField(blank=True, null=True)
     vote = models.IntegerField(blank=True, null=True, choices=VOTE_CHOICES)
     date = models.DateField(blank=False, null=False, default=datetime.date.today)

@@ -6,7 +6,7 @@ DATABASES = {
         'NAME': 'DataDashboard',
         'USER': 'dashboardadm',
         'PASSWORD': '@dmDashb0ard',
-        'HOST': 'localhost',
+        'HOST': '172.16.55.247',
         'PORT': '5432',
     },
     'sims': {

@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='SIMSStudent',
+            name='Student',
             fields=[
                 ('id', models.IntegerField(primary_key=True, serialize=False)),
                 ('student_id', models.IntegerField()),
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='SIMSTeachingGroup',
+            name='TeachingGroup',
             fields=[
                 ('id', models.IntegerField(primary_key=True, serialize=False)),
                 ('teaching_group', models.CharField(max_length=1000)),
@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
                 ('strategy', models.TextField(null=True)),
                 ('created', models.DateField(default=datetime.date.today)),
                 ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='DataDashboard.Teacher')),
-                ('students', models.ManyToManyField(to='DataDashboard.Student')),
+                ('students', models.ManyToManyField(to='DataDashboard.LocalStudent')),
             ],
         ),
         migrations.CreateModel(
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                 ('comment', models.TextField(blank=True, null=True)),
                 ('vote', models.IntegerField(blank=True, null=True)),
                 ('strategy', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='DataDashboard.TeachingStrategy')),
-                ('students', models.ManyToManyField(to='DataDashboard.Student')),
+                ('students', models.ManyToManyField(to='DataDashboard.LocalStudent')),
             ],
         ),
     ]

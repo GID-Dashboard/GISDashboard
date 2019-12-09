@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, reverse
-from .models import SIMSStudent
+from .models import Student
 from .forms import *
 from .filters import *
 from .functions import processstudent
@@ -26,7 +26,7 @@ class StudentListing(ListAPIView):
     def get_queryset(self):
         # filter the queryset based on the filters applied
 
-        queryList = SIMSStudent.objects.all().order_by('student_id')
+        queryList = Student.objects.all().order_by('student_id')
         tutor_group = self.request.query_params.get('tutor_group', None)
         sort_by = self.request.query_params.get('sort_by', None)
 
@@ -48,7 +48,7 @@ def getTutorGRoups(request):
     # null and blank values
 
     if request.method == "GET" and request.is_ajax():
-        groups = SIMSStudent.objects.exclude(tutor_group__isnull=True)\
+        groups = Student.objects.exclude(tutor_group__isnull=True)\
             .order_by('tutor_group').values_list('tutor_group').distinct()
         groups = [i[0] for i in list(groups)]
         data = {
@@ -60,13 +60,13 @@ def getTutorGRoups(request):
 
 
 def students(request):
-    students = SIMSStudent.objects.all()
+    students = Student.objects.all()
 
     return render(request, 'DataDashboard/students.html', {'students': students})
 
 
 def search(request):
-    student_list = SIMSStudent.objects.all()
+    student_list = Student.objects.all()
     user_filter = StudentFilter(request.GET, queryset=student_list)
     if request.method=='POST':
         pass
@@ -84,7 +84,7 @@ def add_intervention(request):
     # Todo; add logic if no students are selected
     # Todo: add logic for if student is in SIMS but not our DB
 
-    students = Student.objects.filter(student_id__in=student_pks)
+    students = LocalStudent.objects.filter(student_id__in=student_pks)
 
     if (request.method == 'POST') and ('searchform' not in request.POST):
             intervention_form = InterventionForm(request.POST)
