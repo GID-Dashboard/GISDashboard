@@ -136,7 +136,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 # For correctly routing sims queries to sims db
 
 DATABASE_ROUTERS = ('DataDashboard.router.SimsRouter',)

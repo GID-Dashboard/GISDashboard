@@ -140,3 +140,4 @@ STATICFILES_DIRS = [
 
 DATABASE_ROUTERS = ('DataDashboard.router.SimsRouter',)
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+STATIC_ROOT = os.path.join(BASE_DIR, 'DataDashboard/static/')
