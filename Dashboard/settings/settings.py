@@ -166,5 +166,5 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY ='641939429667-sok8ndn3niv8u00bhglmhkuc39o4k2lm.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'ey6D9yDlOQgFiMjoSA9_z3Op'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY ='280064423634-0asqfodijq69fk3qa7a11fuuo9mkhr05.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'F1aR0ZyWaRp5RQ4CSOYQVuXd'
