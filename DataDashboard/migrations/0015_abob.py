@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('AB_value', models.IntegerField(null=True)),
                 ('OB_value', models.IntegerField(null=True)),
                 ('department', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='DataDashboard.Department')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='DataDashboard.Student')),
+                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='DataDashboard.LocalStudent')),
             ],
         ),
     ]

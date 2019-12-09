@@ -68,7 +68,7 @@ def addstudent(newstudent):
             year_group.set_integer_year()
 
     new_house, created = House.objects.get_or_create(name=newstudent['house'])
-    db_student, created = Student.objects.get_or_create(user=newuser)
+    db_student, created = LocalStudent.objects.get_or_create(user=newuser)
     db_student.gender = newstudent['gender']
     db_student.student_id = newstudent['student_id']
     db_student.first_name = newstudent['first_name']
@@ -116,7 +116,7 @@ def addrecord(record):
     """ Accepts a dictionary where keys are column names from a Factualy Marksheet,
      and values are the data in each row."""
 
-    student = Student.objects.get(student_id=record['Admission No'])
+    student = LocalStudent.objects.get(student_id=record['Admission No'])
     for key, value in record:
         if is_number(value):
             if key != 'Admission No':
@@ -183,7 +183,7 @@ def addrecord(record):
 
     if record['Admission No.']:
         try:
-            student, created = Student.objects.get_or_create(student_id=record['Admission No.'])
+            student, created = LocalStudent.objects.get_or_create(student_id=record['Admission No.'])
         except(KeyError):
             print('Tried to add a record with no Admission no on record' + str(record))
             return False
@@ -199,7 +199,7 @@ def addrecord(record):
 
             # Add any classgroups
             if data_point == 'Class':
-                teaching_group, created = TeachingGroup.objects.get_or_create(name=record['Class'])
+                teaching_group, created = LocalTeachingGroup.objects.get_or_create(name=record['Class'])
                 student.teachinggroup_set.add(teaching_group)
 
             # The following should be done by the Students import, not marksheets.
@@ -246,7 +246,7 @@ def add_all_records(record):
 
     if record['Admission No.']:
         try:
-            student, created = Student.objects.get_or_create(student_id=record['Admission No.'])
+            student, created = LocalStudent.objects.get_or_create(student_id=record['Admission No.'])
         except(KeyError):
             print('Tried to add a record with no Admission no on record' + str(record))
             return False
