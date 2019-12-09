@@ -313,7 +313,10 @@ class TeachingStrategy(models.Model):
     created = models.DateField(blank=False, null=False, default=datetime.date.today)
 
     def __str__(self):
-        return str(self.category)+ str(self.pk)
+        if self.category:
+            return str(self.category)+ str(self.pk)
+        else:
+            return str(self.pk)
 
 class TeachingStrategyResources(models.Model):
     strategy = models.ForeignKey(TeachingStrategy, on_delete=models.CASCADE)
