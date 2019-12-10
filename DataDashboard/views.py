@@ -203,9 +203,9 @@ def splash(request):
     return render(request, "DataDashboard/splash.html")
 
 
-def logout(request):
+def logout_view(request):
     logout(request)
     messages.add_message(request, messages.SUCCESS, "You have been logged out")
-    return redirect(reverse('DataDashboard:splash'))
+    return redirect(reverse('splash'))
 
 
