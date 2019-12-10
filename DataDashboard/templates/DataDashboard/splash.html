@@ -1,0 +1,18 @@
+{% extends "DataDashboard/base.html" %}
+{% block content %}
+
+    <h1>Garden International School Data Dashboard</h1>
+
+    <div class="well well-lg">
+    {% if request.user.is_authenticated %}
+    Welcome to the Data Dashboard. Please use the nagivation bar above to pick an option.
+
+
+    {% else %}
+    Welcome to the data dashboard. Please log in.<br>
+    <a class='btn btn-success btn-lg' href="{% url "social:begin" "google-oauth2" %}"><i class="fab fa-google"> </i>Login</a>
+    {% endif %}
+
+    </div>
+
+{% endblock content %}
