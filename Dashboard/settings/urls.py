@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from DataDashboard.views import splash, logout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('db/', include('DataDashboard.urls', namespace='DataDashboard')),
-    path('', include('social_django.urls', namespace='social'))
+    path('', include('social_django.urls', namespace='social')),
+    path('', splash, name='splash'),
+    path('logout', logout, name='logout'),
 ]

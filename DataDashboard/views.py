@@ -6,6 +6,8 @@ from .functions import processstudent
 import os
 # Create your views here.
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth import logout
 
 from django.http import JsonResponse
 from django.shortcuts import render, resolve_url
@@ -14,10 +16,21 @@ from .serializers import StudentSerializers
 from .pagination import StandardResultsSetPagination
 
 
+def is_teacher(user=User.objects.none()):
+    teacher_group = Group.objects.get(name='Teachers')
+    if user in teacher_group.user_set.all():
+        return True
+
+    else:
+        return False
+
+
+@user_passes_test(is_teacher)
 def StudentList(request):
     return render(request, "DataDashboard/students_filterable.html", {})
 
 
+@user_passes_test(is_teacher)
 class StudentListing(ListAPIView):
     # set the pagination and serializer class
 
@@ -44,6 +57,7 @@ class StudentListing(ListAPIView):
         return queryList
 
 
+@user_passes_test(is_teacher)
 def getTutorGRoups(request):
     # get all the countreis from the database excluding
     # null and blank values
@@ -59,13 +73,14 @@ def getTutorGRoups(request):
 
 
 
-
+@user_passes_test(is_teacher)
 def students(request):
     students = Student.objects.all()
 
     return render(request, 'DataDashboard/students.html', {'students': students})
 
 
+@user_passes_test(is_teacher)
 def search(request):
     student_list = Student.objects.all()
     user_filter = StudentFilter(request.GET, queryset=student_list)
@@ -74,6 +89,7 @@ def search(request):
     return render(request, 'DataDashboard/student_list.html', {'filter': user_filter})
 
 
+@user_passes_test(is_teacher)
 def add_intervention(request):
     teacher = Teacher.objects.get(user=request.user)
 
@@ -108,12 +124,14 @@ def add_intervention(request):
     return render(request, 'DataDashboard/add_intervention.html', {'students': students,
                                                                    'form': intervention_form})
 
+@user_passes_test(is_teacher)
 def add_resource(request, teaching_strategy_pk):
 
     strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
     pass
 
 
+@user_passes_test(is_teacher)
 def view_strategy(request, teaching_strategy_pk):
     strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
 
@@ -137,6 +155,7 @@ def view_strategy(request, teaching_strategy_pk):
                                                                   'form': comment_form})
 
 
+@user_passes_test(is_teacher)
 def find_strategies(request):
     strategy_list = TeachingStrategy.objects.all()
     strategy_filter = StrategyFilter(request.GET, queryset=strategy_list)
@@ -145,6 +164,7 @@ def find_strategies(request):
     return render(request, 'DataDashboard/strategy_list.html', {'filter': strategy_filter})
 
 
+@user_passes_test(is_teacher)
 def delete_strategy(request, teaching_strategy_pk):
     strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
 
@@ -156,6 +176,7 @@ def delete_strategy(request, teaching_strategy_pk):
         return redirect(reverse("DataDashboard:permission_error"))
 
 
+@user_passes_test(is_teacher)
 def confirmed_delete_strategy(request, teaching_strategy_pk):
     strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
 
@@ -172,7 +193,19 @@ def permission_error(request):
     return render(request, "DataDashboard/permission_error.html")
 
 
+@user_passes_test(is_teacher)
 def report_dashboard(request):
     return render(request, "DataDashboard/report_dashboard.html")
+
+
+# Do not decorate with authentication!
+def splash(request):
+    return render(request, "DataDashboard/splash.html")
+
+
+def logout(request):
+    logout(request)
+    messages.add_message(request, messages.SUCCESS, "You have been logged out")
+    return redirect(reverse('DataDashboard:splash'))
 
 
