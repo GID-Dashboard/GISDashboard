@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Dashboard.settings.wsgi')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Dashboard.settings.secret_gis')
 
 application = get_wsgi_application()
