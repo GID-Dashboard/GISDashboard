@@ -338,25 +338,28 @@ def update_teachers(newteacher):
 
 def sync_sims_and_internal_teachers():
     sims_teachers = SIMSTeacher.objects.all().filter(email_address__isnull=False)
+    teacher_group = Group.objects.get_or_create(name='Teachers')[0]
+
     for teacher in sims_teachers:
-        print("Processing" + str(teacher.email_address))
+        print("Processing " + str(teacher.email_address))
         internal_teacher, created = Teacher.objects.get_or_create(email_address=teacher.email_address)
-        if created:
-            internal_teacher.title_des = teacher.title_des
-            internal_teacher.firstname = teacher.firstname
-            internal_teacher.lastname = teacher.lastname
-            internal_teacher.full_name = teacher.full_name
-            internal_teacher.staff_code = teacher.staff_code
-            internal_teacher.email_address = teacher.email_address
-            internal_teacher.save()
 
-            user, created = User.objects.get_or_create(email=internal_teacher.email_address)
-            teacher_group = Group.objects.get_or_create(name='Teachers')[0]
-            if created:
-                user.first_name = internal_teacher.firstname
-                user.last_name = internal_teacher.lastname
-                user.username = internal_teacher.email_address
-                user.save()
+        internal_teacher.title_des = teacher.title_des
+        internal_teacher.firstname = teacher.firstname
+        internal_teacher.lastname = teacher.lastname
+        internal_teacher.full_name = teacher.full_name
+        internal_teacher.staff_code = teacher.staff_code
+        internal_teacher.email_address = teacher.email_address
+        internal_teacher.save()
 
-                user.groups.add(teacher_group)
-                print("Created user: " + user.username)
+        user, created = User.objects.get_or_create(email=internal_teacher.email_address)
+
+        user.first_name = internal_teacher.firstname
+        user.last_name = internal_teacher.lastname
+        user.username = internal_teacher.email_address
+        user.save()
+
+        user.groups.add(teacher_group)
+        internal_teacher.user = user
+        internal_teacher.save()
+        print("Created user: " + user.username)
