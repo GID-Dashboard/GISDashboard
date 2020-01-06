@@ -10,6 +10,7 @@ class StudentFilter(django_filters.FilterSet):
     tutor_group_id = django_filters.MultipleChoiceFilter(choices=tg_choices)
     house_id = django_filters.MultipleChoiceFilter(choices=house_choices)
     teachinggroup__teaching_group = django_filters.CharFilter(lookup_expr='icontains')
+    student_id = django_filters.NumberFilter()
 
     class Meta:
         model = Student
