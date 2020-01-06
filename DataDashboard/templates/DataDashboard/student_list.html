@@ -56,6 +56,8 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
 
     <script>$(document).ready( function () {
-    $('#student_table').DataTable();
+    $('#student_table').DataTable({
+        "pageLength": 50
+    });
 } );</script>
 {% endblock script %}
