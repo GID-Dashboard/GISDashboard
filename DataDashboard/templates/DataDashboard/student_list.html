@@ -11,11 +11,11 @@
     <button type="submit">Search</button>
   </form>
     </div>
-
+    <div id="student_list">
     <form method="post" action="{% url "DataDashboard:add_intervention" %}">
   {% csrf_token %}
      <input type="hidden" id="searchform" name="searchform" value="searchform">
-
+    <div id="students">
   <table id="student_table">
 
 
@@ -47,9 +47,10 @@
         </tbody>
 
   </table>
+    </div>
     <button type="submit">Submit</button>
     </form>
-
+</div>
 {% endblock %}
 {% block script %}
 
