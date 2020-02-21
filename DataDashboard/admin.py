@@ -4,3 +4,4 @@ from .models import *
 admin.site.register(TeachingStrategy)
 admin.site.register(TeachingStrategyCategory)
 admin.site.register(Teacher)
+admin.site.register(LocalStudent)

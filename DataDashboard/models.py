@@ -3,11 +3,13 @@ from django.contrib.auth.models import User, Group
 import datetime
 
 
+# KEEP
 class House(models.Model):
     name = models.CharField(max_length=50, blank=False, null=False)
     head_of_house = models.ForeignKey('Teacher', blank=True, null=True, on_delete=models.SET_NULL, related_name='hoh')
 
 
+# KEEP
 class Teacher(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     title_des = models.CharField(max_length= 100, blank=True, null=True)
@@ -95,43 +97,6 @@ class LocalTeachingGroup(models.Model):
 
     def __str__(self):
         return self.name
-
-class ClassAtttenanceSession(models.Model):
-    attendance_session = models.ForeignKey(AttendanceSession, blank=False, null=False, on_delete=models.CASCADE)
-    # teaching_group
-    tutor_group = models.ForeignKey(TutorGroup, blank=True, null=True, on_delete=models.CASCADE)
-
-
-class ConductReport(models.Model):
-    student = models.ForeignKey(LocalStudent, blank=False, null=False, on_delete=models.CASCADE)
-    teacher_assigning = models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
-    date = models.DateField(blank=False, null=False)
-    type = models.CharField(blank=False, null=False, max_length=100)
-    comments = models.TextField(blank=True, null=True)
-    points = models.FloatField(blank=False, null=False, default=0)
-
-
-class AttiudinalData(models.Model):
-    student = models.ForeignKey(LocalStudent, blank=False, null=False, on_delete=models.CASCADE)
-    date = models.DateField(blank=False, null=False)
-    pass1 = models.IntegerField(blank=True, null=True)
-    pass2 = models.IntegerField(blank=True, null=True)
-    pass3 = models.IntegerField(blank=True, null=True)
-    pass4 = models.IntegerField(blank=True, null=True)
-    pass5 = models.IntegerField(blank=True, null=True)
-    pass6 = models.IntegerField(blank=True, null=True)
-    pass7 = models.IntegerField(blank=True, null=True)
-    pass8 = models.IntegerField(blank=True, null=True)
-    pass9 = models.IntegerField(blank=True, null=True)
-
-
-class AptitudinalData(models.Model):
-    student = models.ForeignKey(LocalStudent, blank=False, null=False, on_delete=models.CASCADE)
-    date = models.DateField(blank=False, null=False)
-    verbal = models.IntegerField(blank=True, null=True)
-    non_verbal = models.IntegerField(blank=True, null=True)
-    quantitative = models.IntegerField(blank=True, null=True)
-    spatial = models.IntegerField(blank=True, null=True)
 
 
 class SummativeScheme(models.Model):
@@ -313,6 +278,7 @@ class TeachingStrategyCategory(models.Model):
         return self.name
 
 class TeachingStrategy(models.Model):
+    title = models.CharField(max_length=150, blank=False, null=False)
     students = models.ManyToManyField(LocalStudent)
     category = models.ForeignKey(TeachingStrategyCategory, on_delete=models.SET_NULL, blank=False, null=True)
     strategy = models.TextField(blank=False, null=True)
@@ -320,10 +286,7 @@ class TeachingStrategy(models.Model):
     created = models.DateField(blank=False, null=False, default=datetime.date.today)
 
     def __str__(self):
-        if self.category:
-            return str(self.category)+ str(self.pk)
-        else:
-            return str(self.pk)
+        return self.title
 
 class TeachingStrategyResources(models.Model):
     strategy = models.ForeignKey(TeachingStrategy, on_delete=models.CASCADE)
@@ -348,3 +311,8 @@ class TeachingStrategyComment(models.Model):
 
     def __str__(self):
         return "strategy" + str(self.pk)
+
+
+class VerbalSpatialBias(models.Model):
+    student_id = models.IntegerField(blank=False, null=False, unique=True)
+    bias = models.CharField(max_length=50, blank=True, null=True)

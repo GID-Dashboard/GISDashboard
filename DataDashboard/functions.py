@@ -282,28 +282,6 @@ def add_all_records(record):
                 data.value_from_raw()
 
 
-
-def add_CAT4_table():
-    labels = ["CAT4 Verbal SAS",
-              "CAT4 Non-Verbal SAS",
-              "CAT4 Quantative SAS",
-              "CAT4 Spatial SAS",
-              "CAT4 Mean SAS",
-              "CAT4 Maths Car",
-              "CAT4 Maths Level", ]
-
-    relevant_definitions = SummativeDefinition.objects.filter(name__in=labels)
-    relevant_data = SummativeData.objects.filter(data__in=relevant_definitions)
-
-    for point in relevant_data:
-        student_a_data, created = AptitudinalData.objects.get_or_create(student=point.student,
-                                                                        date=point.date)
-
-        if point.name == 'CAT4 Verbal SAS':
-            student_a_data.verbal = point.value
-            student_a_data.save()
-
-
 def process_teacher(path):
     with open(path, newline='') as csvfile:
         next(csvfile, None)
@@ -328,6 +306,34 @@ def process_teacher(path):
         return newteachers
 
 
+def assign_cat4_strategies():
+    """
+    First, import CAT4 profiles to the database. This funcrtion will assign interventions.
+    """
+
+    cat4_category = TeachingStrategyCategory.objects.get(name='CAT4 Suggested')
+    strategies = TeachingStrategy.objects.filter(category=cat4_category)
+
+    for strategy in strategies:
+        strategy.students.clear()
+
+    records = VerbalSpatialBias.objects.all()
+
+    for record in records:
+        intervention, int_created = TeachingStrategy.objects.get_or_create(title=record.bias)
+        if int_created:
+            print("Created an intervention called " + str(intervention.title))
+            intervention.delete()
+            continue
+        student, stu_created = LocalStudent.objects.get_or_create(student_id=record.student_id)
+        if stu_created:
+            print("Created a student with ID " + str(student.student_id))
+            student.delete()
+            continue
+        intervention.students.add(student)
+        intervention.save()
+
+
 def update_teachers(newteacher):
     teacher, created = Teacher.objects.get_or_create(staff_code=newteacher['staff_code'])
     teacher.email = newteacher['primary_email']
@@ -338,7 +344,7 @@ def update_teachers(newteacher):
 
 def sync_sims_and_internal_teachers():
     sims_teachers = SIMSTeacher.objects.all().filter(email_address__isnull=False)
-    teacher_group = Group.objects.get_or_create(name='Teachers')[0]
+    teacher_group, created = Group.objects.get_or_create(name='Teachers')
 
     for teacher in sims_teachers:
         print("Processing " + str(teacher.email_address))
@@ -363,3 +369,27 @@ def sync_sims_and_internal_teachers():
         internal_teacher.user = user
         internal_teacher.save()
         print("Created user: " + user.username)
+
+        # Todo: Add logic for deleting students who have left
+
+
+def sync_sims_and_internal_students():
+    sims_students = Student.objects.all()
+
+    for student in sims_students:
+        print("Processing " + str(student.first_name ) + " " + str(student.last_name))
+        internal_student, created = LocalStudent.objects.get_or_create(student_id=student.student_id)
+
+        internal_student.last_name = student.last_name
+        internal_student.first_name = student.first_name
+        internal_student.house, created = House.objects.get_or_create(name=student.house_id)
+        internal_student.preferred_forename = student.preferred_forename
+        internal_student.gender = student.gender
+        internal_student.sen_status = student.SEN_status
+        internal_student.eal_status = student.EAL_status
+        internal_student.exam_candidate_number = student.exam_candidate_number
+        internal_student.parent_email = student.parent_email
+        internal_student.tutor_group, created = TutorGroup.objects.get_or_create(group_name=student.tutor_group_id)
+        internal_student.student_email = student.student_email
+
+        internal_student.save()
