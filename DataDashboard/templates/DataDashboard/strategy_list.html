@@ -29,7 +29,7 @@
         {% for strategy in filter.qs %}
             <tr>
                 <td>{{ strategy.category}}</td>
-                <td><a href="{% url 'DataDashboard:view_strategy' strategy.pk %}">{{ strategy.strategy }}</a></td>
+                <td><a href="{% url 'DataDashboard:view_strategy' strategy.pk %}">{{ strategy.title }}</a></td>
                 <td>{% for student in strategy.students.all %}{{ student }} {% endfor %}</td>
                 <td>{{ strategy.created }}</td>
                 <td>{{ strategy.created_by }}</td>

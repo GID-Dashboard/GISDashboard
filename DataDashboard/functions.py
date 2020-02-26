@@ -1,4 +1,4 @@
-import csv, re
+import csv, re, tabula
 from openpyxl import load_workbook
 from django.contrib.auth.models import User, Group
 from .models import *
@@ -334,6 +334,23 @@ def assign_cat4_strategies():
         intervention.save()
 
 
+def assign_pass_strategies():
+    low_pass_values = SIMSSummativeData.objects.filter(aspect_name__contains="PASS ", result_value__lte=30).\
+        exclude(aspect_name__icontains="Domain")
+
+    total = low_pass_values.count()
+    n = 1
+
+    for low_value in low_pass_values:
+        print("Now on " + str(n) +  "/"  + str(total))
+        local_student = LocalStudent.objects.get(student_id=low_value.student.student_id)
+        intervention = TeachingStrategy.objects.get(title__contains=low_value.aspect_name)
+
+        intervention.students.add(local_student)
+        n = n + 1
+
+
+
 def update_teachers(newteacher):
     teacher, created = Teacher.objects.get_or_create(staff_code=newteacher['staff_code'])
     teacher.email = newteacher['primary_email']
@@ -393,3 +410,13 @@ def sync_sims_and_internal_students():
         internal_student.student_email = student.student_email
 
         internal_student.save()
+
+
+def import_cat4_pdfs(path="/Users/wright.j/Downloads/ADAM_Cynthia_17_Sep_2019_ocr.pdf"):
+    """
+    Get the CAT4 PDF for a student and import their grade probabilities
+
+    """
+    df = tabula.read_pdf(path, pages='all')
+
+    return df

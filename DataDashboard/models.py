@@ -316,3 +316,53 @@ class TeachingStrategyComment(models.Model):
 class VerbalSpatialBias(models.Model):
     student_id = models.IntegerField(blank=False, null=False, unique=True)
     bias = models.CharField(max_length=50, blank=True, null=True)
+
+class SIMSSummativeData(models.Model):
+    aspect_id = models.IntegerField(blank=True, null=True)
+    student = models.ForeignKey(Student, blank=True, null=True, on_delete=models.SET_NULL)
+    aspect_name = models.CharField(max_length=200, blank=True, null=True)
+    result = models.TextField(blank=True, null=True)
+    result_value = models.FloatField(blank=True, null=True)
+    result_date = models.DateTimeField(blank=True, null=True)
+    aspect_type = models.CharField(max_length=100, blank=True, null=True
+                                   )
+    class Meta:
+        managed = False
+        db_table = 'sims].[DataDashboard_summativedata'
+
+
+class CAT4GradeProbability(models.Model):
+    student = models.ForeignKey(LocalStudent, on_delete=models.CASCADE, blank=False, null=False)
+    subject = models.CharField(max_length=100, blank=False, null=False)
+    qualification = models.CharField(max_length=20, blank=False, null=False)
+    grade = models.CharField(max_length=3, blank=False, null=False)
+    probability = models.FloatField(blank=False, null=False)
+    cumulative_probability = models.FloatField(blank=True, null=True)
+
+    def numerical_grade(self):
+        if self.grade == "A*" or self.grade == "S":
+            return 9
+        if self.grade == "A":
+            return 8
+        if self.grade == "B":
+            return 7
+        if self.grade == "C":
+            return 6
+        if self.grade == "D":
+            return 5
+        if self.grade =="E":
+            return 4
+        if self.grade == "F":
+            return 3
+        if self.grade == "G":
+            return 2
+        if self.grade == "U":
+            return 1
+        else:
+            return 0
+
+
+    class Meta:
+        unique_together = ('student', 'subject', 'qualification', 'grade')
+
+
