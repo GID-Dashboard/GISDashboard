@@ -1,4 +1,4 @@
-from .models import Student, TeachingStrategy, LocalTeachingGroup
+from .models import Student, TeachingStrategy, LocalTeachingGroup, TeachingStrategyComment
 import django_filters
 
 class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):

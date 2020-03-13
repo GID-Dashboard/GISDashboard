@@ -134,7 +134,6 @@ def add_resource(request, teaching_strategy_pk):
 @user_passes_test(is_teacher)
 def view_strategy(request, teaching_strategy_pk):
     strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
-
     comment_form = InterventionCommentForm()
 
     if request.method == 'POST':
@@ -152,7 +151,8 @@ def view_strategy(request, teaching_strategy_pk):
     return render(request, 'DataDashboard/view_strategies.html', {'strategy': strategy,
                                                                   'comments': comments,
                                                                   'resources': resources,
-                                                                  'form': comment_form})
+                                                                  'form': comment_form,
+                                                                  'student_search_form': student_search_form},)
 
 
 @user_passes_test(is_teacher)
