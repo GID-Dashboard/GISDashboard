@@ -11,20 +11,17 @@
 <h1>{{ strategy.category }} Teaching Strategy</h1>
 
     <h2>Strategy</h2>
-    {{ strategy.strategy }}
+    {{ strategy.strategy|safe }}
 
     <h2>Comments</h2>
     <div class="row">
-        <div class="col-md-3 fixed">
-            <h3>Apply this comment to the following students...</h3>
-            {{ student_search_form.form | crispy  }}
-        </div>
+        <div class="col">
 
-        <div class="col-lg-9 right">
             <table class="datatable" id="comment_table">
             <thead>
             <tr>
                 <td>Date</td>
+                <td>Students</td>
                 <td>Comment</td>
                 <td>Vote</td>
                 <td>Comment by</td>
@@ -34,20 +31,39 @@
                 {% for comment in comments %}
                     <tr>
                         <td>{{ comment.date }}</td>
+                        <td><ul>{% for student in comment.students.all %}<li>{{ student }}{% endfor %}</li></ul></td>
                         <td>{{ comment.comment }}</td>
                         <td>{{ comment.vote }}</td>
                         <td>{{ comment.author }}</td>
+
                     </tr>
                 {% endfor %}
             </tbody>
             </table>
-            <h3>Add new comment</h3>
-            <form method="post">
+        </div>
+    </div>
+    <div class="row">
+    <form method="post">
+        <h3>Add new comment</h3>
+        <div class="row">
+        <div class="col-md-5 fixed">
+            <h3>Apply this comment to the following students...</h3>
+            <ul>
+                {% for student in comment_students %}
+                    <div class="checkbox">
+                    <label><input type="checkbox" name="comment_students" value="{{ student.student_id }}">{{ student }}</label>
+                    </div>
+                {% endfor %}
+            </ul>
+
+        </div>
+        <div class="col-md-6 right">
             {% csrf_token %}
             {{ form| crispy }}
             <button type="submit">Submit</button>
-            </form>
+
         </div>
+</div></form>
     </div>
 {% endblock content %}
 {% block script %}

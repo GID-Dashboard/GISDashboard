@@ -21,6 +21,15 @@ class StudentFilter(django_filters.FilterSet):
         fields = ['first_name', 'last_name', 'tutor_group_id', 'house_id']
 
 
+class InterventionStudentFilter(django_filters.FilterSet):
+
+    students = django_filters.ModelChoiceFilter()
+
+    class Meta:
+        model = TeachingStrategy
+        fields = ['students',]
+
+
 class StrategyFilter(django_filters.FilterSet):
     category__name = django_filters.CharFilter(lookup_expr='icontains')
     strategy = django_filters.CharFilter(lookup_expr='icontains')

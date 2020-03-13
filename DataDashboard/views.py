@@ -134,6 +134,11 @@ def add_resource(request, teaching_strategy_pk):
 @user_passes_test(is_teacher)
 def view_strategy(request, teaching_strategy_pk):
     strategy = TeachingStrategy.objects.get(pk=teaching_strategy_pk)
+    comment_students = strategy.students.all()
+    get_items = request.GET.get('student_id')
+    if get_items:
+        student_ids = get_items.split(",")
+        comment_students = comment_students.filter(student_id__in=student_ids)
     comment_form = InterventionCommentForm()
 
     if request.method == 'POST':
@@ -144,6 +149,10 @@ def view_strategy(request, teaching_strategy_pk):
             comment.author = Teacher.objects.get(user=request.user)
             comment.save()
             comment_form = InterventionCommentForm()
+            commented_student_ids = request.POST.getlist('comment_students')
+            commented_students = strategy.students.filter(student_id__in=commented_student_ids)
+            comment.students.add(*commented_students)
+            comment.save()
 
     comments = TeachingStrategyComment.objects.filter(strategy=strategy)
     resources = TeachingStrategyResources.objects.filter(strategy=strategy)
@@ -152,7 +161,9 @@ def view_strategy(request, teaching_strategy_pk):
                                                                   'comments': comments,
                                                                   'resources': resources,
                                                                   'form': comment_form,
-                                                                  'student_search_form': student_search_form},)
+                                                                  'comment_students': comment_students,
+                                                                  }
+                                                                )
 
 
 @user_passes_test(is_teacher)
