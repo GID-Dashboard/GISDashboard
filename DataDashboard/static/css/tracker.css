@@ -1,0 +1,10 @@
+
+.left {
+  flex-basis: 20%;
+}
+
+.right {
+
+  height: 100vh;
+  overflow: auto;
+}

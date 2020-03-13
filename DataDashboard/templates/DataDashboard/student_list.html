@@ -5,13 +5,16 @@
 
 {% endblock import_js %}
 {% block content %}
-    <div class="well">
-  <form method="get">
-    {{ filter.form | crispy}}
-    <button type="submit">Search</button>
-  </form>
+    <div class="row">
+    <div class="col-md-3 fixed">
+        <div class="well">
+            <form method="get">
+                {{ filter.form | crispy}}
+                <button type="submit">Search</button>
+            </form>
+        </div>
     </div>
-
+    <div class="col-lg-9 right">
     <form method="post" action="{% url "DataDashboard:add_intervention" %}">
   {% csrf_token %}
      <input type="hidden" id="searchform" name="searchform" value="searchform">
@@ -49,13 +52,16 @@
   </table>
     <button type="submit">Submit</button>
     </form>
-
+    </div>
+    </div>
 {% endblock %}
 {% block script %}
 
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
 
     <script>$(document).ready( function () {
-    $('#student_table').DataTable();
+    $('#student_table').DataTable( {
+  "pageLength": 50
+} );
 } );</script>
 {% endblock script %}
