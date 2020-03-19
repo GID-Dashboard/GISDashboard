@@ -79,26 +79,7 @@ WSGI_APPLICATION = 'Dashboard.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gis_datadb',
-        'USER': 'dashboard',
-        'PASSWORD': 'r3q0DO&0#r9g@dkZtHCoFMY6',
-        'HOST': 'localhost',
-        'PORT': '5432',
 
-    },
-    'sims': {
-        'ENGINE': 'sql_server.pyodbc',
-        'NAME': 'gis111207',
-        'HOST': 'GISSIMSSVR',
-        'USER': 'dashboardadm',
-        'PASSWORD': '@dmDashb0ard',
-
-    }
-
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

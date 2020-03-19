@@ -350,7 +350,6 @@ def assign_pass_strategies():
         n = n + 1
 
 
-
 def update_teachers(newteacher):
     teacher, created = Teacher.objects.get_or_create(staff_code=newteacher['staff_code'])
     teacher.email = newteacher['primary_email']
