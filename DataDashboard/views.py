@@ -220,3 +220,11 @@ def logout_view(request):
     return redirect(reverse('splash'))
 
 
+@user_passes_test(is_teacher)
+def tutorial(request, page_pk):
+    page = TutorialPage.objects.get(pk=page_pk)
+    return render(request, "DataDashboard/tutorial.html", {'page': page,
+                                                           'next_page': page.next_page(),
+                                                           'previous_page': page.previous_page()
+                                                           })
+

@@ -1,0 +1,45 @@
+{% extends "DataDashboard/base.html" %}
+{% block content %}
+    <h1>{{ page.category.name }}</h1>
+    <div class="row">
+    <div class="col-md-6">
+<iframe  src="{{ page.dashboard_page }}" frameborder="0" allowFullScreen="true" width="100%" height="350"></iframe>
+    </div>
+    <div class="col-md-6">
+        <div data-video = "{{ page.video }}"
+         data-startseconds = "{{ page.video_start }}"
+         data-endseconds = "{{ page.video_end }}"
+         data-height = "309"
+         data-width = "550"
+         id = "youtube-player">
+        </div>
+
+        <script src="https://www.youtube.com/iframe_api"></script>
+        <script type="text/javascript">
+          function onYouTubeIframeAPIReady() {
+            var ctrlq = document.getElementById("youtube-player");
+            var player = new YT.Player('youtube-player', {
+              height: ctrlq.dataset.height,
+              width: ctrlq.dataset.width,
+              events: {
+                'onReady': function(e) {
+                  e.target.cueVideoById({
+                    videoId: ctrlq.dataset.video,
+                    startSeconds: ctrlq.dataset.startseconds,
+                    endSeconds: ctrlq.dataset.endseconds
+                  });
+                }
+              }
+            });
+          }
+        </script>
+    {{ page.instructions|safe }}
+        {% if page.previous_page %}
+        <a href="{% url 'DataDashboard:tutorial' page.previous_page.pk %}"><button class="btn-primary"><< Previous</button></a>
+        {% endif %}
+    {% if page.next_page %}
+        <a href="{% url 'DataDashboard:tutorial' page.next_page.pk %}"><button class="btn-primary">Next >></button></a>
+        {% endif %}
+    </div>
+    </div>
+{% endblock content %}

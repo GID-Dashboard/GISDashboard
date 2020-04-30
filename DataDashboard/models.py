@@ -366,3 +366,46 @@ class CAT4GradeProbability(models.Model):
         unique_together = ('student', 'subject', 'qualification', 'grade')
 
 
+class OldVSBiases(models.Model):
+    student_number = models.IntegerField(blank=False, null=False)
+    bias = models.CharField(max_length=100, blank=False, null=False)
+
+
+class TutorialCategory(models.Model):
+    name = models.CharField(max_length=200, blank=False, null=False)
+
+    def total_pages(self):
+        return TutorialPage.objects.filter(category=self).count()
+
+    def __str(self):
+        return self.name
+
+
+class TutorialPage(models.Model):
+    category = models.ForeignKey(TutorialCategory, blank=False, null=True, on_delete=models.SET_NULL)
+    order = models.IntegerField(blank=False, null=False)
+    name = models.CharField(max_length=250, blank=False, null=False)
+    video = models.CharField(max_length=50, blank=True, null=True)
+    video_start = models.IntegerField(default=0, blank=False, null=False)
+    video_end = models.IntegerField(default=10000, blank=False, null=False)
+    dashboard_page = models.URLField(blank=True, null=True)
+    instructions = models.TextField(blank=True, null=True)
+
+    def next_page(self):
+        if self.order:
+            if self.order < self.category.total_pages():
+                return TutorialPage.objects.get(order=self.order+1, category=self.category)
+
+        return False
+
+    def previous_page(self):
+        if self.order > 1:
+            return TutorialPage.objects.get(order=self.order-1, category=self.category)
+        else:
+            return False
+
+    class Meta:
+        unique_together = ('category', 'order')
+
+    def __str__(self):
+        return self.name

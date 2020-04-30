@@ -32,6 +32,18 @@ def processstudent(path):
         return newstudents
 
 
+def process_vs_file(path):
+    VerbalSpatialBias.objects.all().delete()
+    with open(path, newline='') as csvfile:
+        next(csvfile, None)
+
+        vs_profiles = csv.reader(csvfile, delimiter=',', quotechar='|')
+
+        for row in vs_profiles:
+            new = VerbalSpatialBias.objects.create(student_id=row[1], bias=row[0])
+            new.save()
+
+
 def addstudent(newstudent):
     # Test to see whether the user exists yet
 
@@ -335,9 +347,10 @@ def assign_cat4_strategies():
 
 
 def assign_pass_strategies():
+    print("Assigning pass strategies")
     low_pass_values = SIMSSummativeData.objects.filter(aspect_name__contains="PASS ", result_value__lte=30).\
         exclude(aspect_name__icontains="Domain")
-
+    print("Found lows")
     total = low_pass_values.count()
     n = 1
 
@@ -419,3 +432,20 @@ def import_cat4_pdfs(path="/Users/wright.j/Downloads/ADAM_Cynthia_17_Sep_2019_oc
     df = tabula.read_pdf(path, pages='all')
 
     return df
+
+
+def dump_old_vs_biases():
+    # Iterate over all the strategies:
+    for strategy in TeachingStrategy.objects.all():
+        # Add one for each student:
+        for student in strategy.students.all():
+            OldVSBiases.objects.create(student_number=student.student_id,
+                                       bias=strategy.title)
+
+
+def import_old_biases():
+    for record in OldVSBiases.objects.all():
+        strategy, created = TeachingStrategy.objects.get_or_create(title=record.bias)
+        student, created = LocalStudent.objects.get_or_create(student_id=record.student_number)
+        strategy.students.add(student)
+        strategy.save()
