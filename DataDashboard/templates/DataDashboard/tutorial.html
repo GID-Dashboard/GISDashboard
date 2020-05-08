@@ -1,11 +1,11 @@
-{% extends "DataDashboard/base.html" %}
+{% extends "DataDashboard/base_wide.html" %}
 {% block content %}
     <h1>{{ page.category.name }}</h1>
     <div class="row">
-    <div class="col-md-6">
-<iframe  src="{{ page.dashboard_page }}" frameborder="0" allowFullScreen="true" width="100%" height="350"></iframe>
+    <div class="col-md-8">
+<iframe  src="{{ page.dashboard_page }}" frameborder="0" allowFullScreen="true" width="100%" height="650"></iframe>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div data-video = "{{ page.video }}"
          data-startseconds = "{{ page.video_start }}"
          data-endseconds = "{{ page.video_end }}"
@@ -13,7 +13,7 @@
          data-width = "550"
          id = "youtube-player">
         </div>
-
+        <div class="container">
         <script src="https://www.youtube.com/iframe_api"></script>
         <script type="text/javascript">
           function onYouTubeIframeAPIReady() {
@@ -33,7 +33,10 @@
             });
           }
         </script>
+        </div>
+        <div class="container">
     {{ page.instructions|safe }}
+        </div>
         {% if page.previous_page %}
         <a href="{% url 'DataDashboard:tutorial' page.previous_page.pk %}"><button class="btn-primary"><< Previous</button></a>
         {% endif %}

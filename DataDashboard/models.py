@@ -409,3 +409,60 @@ class TutorialPage(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# For primary curriculum
+class Term(models.Model):
+    name = models.CharField(max_length=20, blank=False, null=False, unique=True)
+    order = models.IntegerField(blank=False, null=False)
+
+    def save(self, *args, **kwargs):
+        super(Term, self).save(*args, **kwargs)
+        for topic in Topic.objects.all():
+            sheet, created = CoverSheet.objects.get_or_create(topic=topic, term=self)
+            if created:
+                sheet.name = sheet.term.name + " " + sheet.topic.name
+                sheet.save()
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.name
+
+
+class Subject(models.Model):
+    name = models.CharField(max_length=50, blank=False, null=False, unique=True)
+    def __str__(self):
+        return self.name
+
+class Topic(models.Model):
+    name = models.CharField(max_length=100, blank=False, null=False)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, blank=False, null=True)
+
+    def save(self, *args, **kwargs):
+        super(Topic, self).save(*args, **kwargs)
+        for term in Term.objects.all():
+
+            sheet, created = CoverSheet.objects.get_or_create(topic=self, term=term)
+            if created:
+                sheet.name = sheet.term.name + " " + sheet.topic.name
+                sheet.save()
+    def __str__(self):
+        return self.name
+
+
+class CoverSheet(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, blank=False, null=False)
+    term = models.ForeignKey(Term, on_delete=models.CASCADE, blank=False, null=False)
+    name = models.CharField(max_length=100, blank=False, null=True)
+    national_curriculum_links = models.TextField(blank=True, null=True)
+    prior_learning = models.TextField(blank=True, null=True)
+    common_misconceptions = models.TextField(blank=True, null=True)
+    sow = models.URLField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ("topic", "term")
+
+    def __str__(self):
+        return str(self.term) + " " + str(self.topic) + " " + self.name
