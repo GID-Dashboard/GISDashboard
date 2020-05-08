@@ -419,10 +419,11 @@ class Term(models.Model):
     def save(self, *args, **kwargs):
         super(Term, self).save(*args, **kwargs)
         for topic in Topic.objects.all():
-            sheet, created = CoverSheet.objects.get_or_create(topic=topic, term=self)
-            if created:
-                sheet.name = sheet.term.name + " " + sheet.topic.name
-                sheet.save()
+            for year in YearGroup.objects.filter(integer_year__lte=6):
+                sheet, created = CoverSheet.objects.get_or_create(topic=topic, term=self, yeargroup=year)
+                if created:
+                    sheet.name = "Y" + sheet.yeargroup.year+ " " + sheet.term.name + " " + sheet.topic.name
+                    sheet.save()
 
     class Meta:
         ordering = ["order"]
@@ -443,11 +444,13 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         super(Topic, self).save(*args, **kwargs)
         for term in Term.objects.all():
+            for year in YearGroup.objects.filter(integer_year__lte=6):
 
-            sheet, created = CoverSheet.objects.get_or_create(topic=self, term=term)
-            if created:
-                sheet.name = sheet.term.name + " " + sheet.topic.name
-                sheet.save()
+                sheet, created = CoverSheet.objects.get_or_create(topic=self, term=term, yeargroup=year)
+                if created:
+                    sheet.name = "Y" + sheet.yeargroup.year + " " + sheet.term.name + " " + sheet.topic.name
+                    sheet.save()
+
     def __str__(self):
         return self.name
 
@@ -455,6 +458,7 @@ class Topic(models.Model):
 class CoverSheet(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, blank=False, null=False)
     term = models.ForeignKey(Term, on_delete=models.CASCADE, blank=False, null=False)
+    yeargroup = models.ForeignKey(YearGroup, on_delete=models.CASCADE, blank=False, null=True)
     name = models.CharField(max_length=100, blank=False, null=True)
     national_curriculum_links = models.TextField(blank=True, null=True)
     prior_learning = models.TextField(blank=True, null=True)
@@ -462,7 +466,10 @@ class CoverSheet(models.Model):
     sow = models.URLField(blank=True, null=True)
 
     class Meta:
-        unique_together = ("topic", "term")
+        unique_together = ("topic", "term", "yeargroup")
 
     def __str__(self):
-        return str(self.term) + " " + str(self.topic) + " " + self.name
+        if self.name:
+            return self.name
+
+        return str(self.yeargroup) + " "  + (self.term) + " " + str(self.topic)
