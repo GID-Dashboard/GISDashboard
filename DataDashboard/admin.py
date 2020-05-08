@@ -11,5 +11,9 @@ admin.site.register(TutorialPage)
 admin.site.register(Topic)
 admin.site.register(Subject)
 admin.site.register(Term)
-admin.site.register(CoverSheet)
 admin.site.register(YearGroup)
+
+class CoverSheetAdmin(admin.ModelAdmin):
+    fields = ('name', 'sow', 'national_curriculum_links', 'prior_learning', 'common_misconceptions')
+
+admin.site.register(CoverSheet, CoverSheetAdmin)

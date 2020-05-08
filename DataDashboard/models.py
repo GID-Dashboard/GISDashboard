@@ -459,11 +459,11 @@ class CoverSheet(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, blank=False, null=False)
     term = models.ForeignKey(Term, on_delete=models.CASCADE, blank=False, null=False)
     yeargroup = models.ForeignKey(YearGroup, on_delete=models.CASCADE, blank=False, null=True)
-    name = models.CharField(max_length=100, blank=False, null=True)
+    name = models.CharField(max_length=100, blank=False, null=True, help_text="Name of your unit of work", verbose_name='Unit Name')
     national_curriculum_links = models.TextField(blank=True, null=True)
     prior_learning = models.TextField(blank=True, null=True)
     common_misconceptions = models.TextField(blank=True, null=True)
-    sow = models.URLField(blank=True, null=True)
+    sow = models.URLField(blank=True, null=True, help_text="This can be a link to <em>Google Drive</em> or any other site", verbose_name='SoW Link')
 
     class Meta:
         unique_together = ("topic", "term", "yeargroup")
