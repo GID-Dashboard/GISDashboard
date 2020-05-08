@@ -209,6 +209,11 @@ def report_dashboard(request):
     return render(request, "DataDashboard/report_dashboard.html")
 
 
+@user_passes_test(is_teacher)
+def curriculum_dashboard(request):
+    return render(request, "DataDashboard/curriculum_dashboard.html")
+
+
 # Do not decorate with authentication!
 def splash(request):
     return render(request, "DataDashboard/splash.html")

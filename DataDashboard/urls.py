@@ -16,6 +16,7 @@ urlpatterns = [
     path('strategies/<int:teaching_strategy_pk>/delete', delete_strategy, name='delete_strategy'),
     path('strategies/<int:teaching_strategy_pk>/confirm_delete', confirmed_delete_strategy, name='confirm_delete_strategy'),
     path('reportdashboard/', report_dashboard, name='report_dashboard'),
+    path('curriculum/', curriculum_dashboard, name='curriculum_dashboard'),
     path('tutorial/<int:page_pk>', tutorial, name='tutorial'),
     path('', splash, name='splash'),
 ]
