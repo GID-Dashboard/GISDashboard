@@ -10,7 +10,7 @@
 
     {% else %}
     Welcome to the data dashboard. Please log in.<br>
-    <a class='btn btn-success btn-lg' href="{% url "social:begin" "google-oauth2" %}"><i class="fab fa-google"> </i>Login</a>
+    <a class='btn btn-success btn-lg' href="{% url "social:begin" "google-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"><i class="fab fa-google"> </i>Login</a>
     {% endif %}
 
     </div>
