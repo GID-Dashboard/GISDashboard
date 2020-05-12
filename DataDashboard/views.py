@@ -221,7 +221,7 @@ def report_dashboard(request):
 def curriculum_dashboard(request):
     return render(request, "DataDashboard/curriculum_dashboard.html")
 
-@user_passes_test(allow_master())
+@user_passes_test(allow_master)
 def master_dashboard(request):
     return render(request, "DataDashboard/master_dashboard.html")
 
