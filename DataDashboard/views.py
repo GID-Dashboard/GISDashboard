@@ -24,6 +24,14 @@ def is_teacher(user=User.objects.none()):
     else:
         return False
 
+def allow_master(user=User.objects.none()):
+    master_group, created = Group.objects.get_or_create(name='MasterDB')
+    if user in master_group.user_set.all():
+        return True
+
+    else:
+        return False
+
 
 @user_passes_test(is_teacher)
 def StudentList(request):
@@ -212,6 +220,10 @@ def report_dashboard(request):
 @user_passes_test(is_teacher)
 def curriculum_dashboard(request):
     return render(request, "DataDashboard/curriculum_dashboard.html")
+
+@user_passes_test(allow_master())
+def master_dashboard(request):
+    return render(request, "DataDashboard/master_dashboard.html")
 
 
 # Do not decorate with authentication!

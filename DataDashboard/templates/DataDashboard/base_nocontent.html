@@ -42,6 +42,9 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{% url "DataDashboard:report_dashboard" %}">Student Data Explorer</a>
                         <a class="dropdown-item" href="{% url "DataDashboard:curriculum_dashboard" %}">Primary Curriculum</a>
+                        {% if request.user|has_group:"MasterDB" %}
+                            <a class="dropdown-item" href="{% url "DataDashboard:master_dashboard" %}">Master Dashboard</a>
+                        {% endif %}
 
                     </div>
                 </li>
